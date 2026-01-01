@@ -17,9 +17,16 @@ public class ApiGatewayApplication {
 	@Bean
 	public RouteLocator myRoutes(RouteLocatorBuilder builder) {
 		return builder.routes()
-			.route("core-service", r -> r.path("/core/**") // Ako putanja krece sa /core...
-				.filters(f -> f.stripPrefix(1))            // ...obrisi "/core"...
-				.uri("http://localhost:8081"))             // ...i posalji na port 8081.
+			// Ruta za Core Service
+			.route("core-service", r -> r.path("/core/**")
+				.filters(f -> f.stripPrefix(1))
+				.uri("http://localhost:8081"))
+			
+			// NOVA RUTA: Card Service
+			.route("card-service", r -> r.path("/card/**")
+				.filters(f -> f.stripPrefix(1))
+				.uri("http://localhost:8082"))
+				
 			.build();
 	}
 }

@@ -1,0 +1,20 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: psp-card-service
+  
+  datasource:
+    # Card baza je na portu 5433 (iz docker-compose)
+    url: jdbc:postgresql://localhost:5433/psp_card_db
+    username: postgres
+    password: super
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
