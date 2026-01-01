@@ -4,8 +4,5 @@ server:
 spring:
   application:
     name: api-gateway
-  cloud:
-    gateway:
-      routes:
-        # Ovde ćemo kasnije dodati rute ka Core i Card servisu
-        # Za sad je prazno dok ne napravimo te servise
+  main:
+    web-application-type: reactive
