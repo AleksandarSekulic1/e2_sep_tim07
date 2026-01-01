@@ -7,25 +7,25 @@ services:
     container_name: psp-core-db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: super
       POSTGRES_DB: psp_core_db
     ports:
-      - "5432:5432"
+      - "5444:5432"  # <--- PROMENJENO: Mapiramo na port 5444 da izbegnemo tvoj lokalni Postgres
     volumes:
       - psp_core_data:/var/lib/postgresql/data
     networks:
       - psp-network
 
-  # 2. Baza za Card/QR Servis (PostgreSQL) - Drugačiji port da ne bude konflikta
+  # 2. Baza za Card/QR Servis (PostgreSQL)
   psp-card-db:
     image: postgres:15-alpine
     container_name: psp-card-db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: super
       POSTGRES_DB: psp_card_db
     ports:
-      - "5433:5432" # Mapiramo na port 5433 na tvom kompjuteru
+      - "5433:5432" # Ovo je OK, port 5433 je verovatno slobodan
     volumes:
       - psp_card_data:/var/lib/postgresql/data
     networks:
