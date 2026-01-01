@@ -27,6 +27,10 @@ public class ApiGatewayApplication {
 				.filters(f -> f.stripPrefix(1))
 				.uri("http://localhost:8082"))
 				
+			// NOVA RUTA: PayPal Service
+            .route("paypal-service", r -> r.path("/paypal/**")
+                .filters(f -> f.stripPrefix(1))
+                .uri("http://localhost:8083"))
 			.build();
 	}
 }
