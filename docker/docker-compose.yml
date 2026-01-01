@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # 1. Baza za PSP Core Servis (PostgreSQL)
+  psp-core-db:
+    image: postgres:15-alpine
+    container_name: psp-core-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: psp_core_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - psp_core_data:/var/lib/postgresql/data
+    networks:
+      - psp-network
+
+  # 2. Baza za Card/QR Servis (PostgreSQL) - Drugačiji port da ne bude konflikta
+  psp-card-db:
+    image: postgres:15-alpine
+    container_name: psp-card-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: psp_card_db
+    ports:
+      - "5433:5432" # Mapiramo na port 5433 na tvom kompjuteru
+    volumes:
+      - psp_card_data:/var/lib/postgresql/data
+    networks:
+      - psp-network
+
+  # 3. Baza za PayPal Servis (MongoDB)
+  paypal-mongo-db:
+    image: mongo:6.0
+    container_name: paypal-mongo-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - paypal_data:/data/db
+    networks:
+      - psp-network
+
+  # 4. Message Broker (RabbitMQ)
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: psp-rabbitmq
+    ports:
+      - "5672:5672"   # Glavni port za komunikaciju
+      - "15672:15672" # Port za Admin Panel (http://localhost:15672)
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    networks:
+      - psp-network
+
+volumes:
+  psp_core_data:
+  psp_card_data:
+  paypal_data:
+
+networks:
+  psp-network:
+    driver: bridge
