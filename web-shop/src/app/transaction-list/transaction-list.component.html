@@ -15,6 +15,7 @@
     <thead>
       <tr>
         <th>ID</th>
+        <th>Vreme</th> 
         <th>Prodavnica ID</th>
         <th>Iznos</th>
         <th>Valuta</th>
@@ -23,28 +24,91 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let t of filteredTransactions">
+      <tr *ngFor="let t of filteredTransactions" (click)="openModal(t)" class="clickable-row">
         <td>{{ t.id }}</td>
+        
+        <td style="font-size: 0.9em; color: #555;">
+          {{ t.merchantTimestamp | date:'dd.MM.yyyy HH:mm' }}
+        </td>
+
         <td>{{ t.merchantOrderId }}</td>
-        <td>{{ t.amount | number:'1.2-2' }}</td>
+        
+        <td style="font-weight: bold;">
+          {{ t.amount | number:'1.2-2' }}
+        </td>
+        
         <td>{{ t.currency }}</td>
+        
         <td>
-          <span class="badge" [ngClass]="{'card-badge': t.paymentMethod === 'CARD', 'paypal-badge': t.paymentMethod === 'PAYPAL'}">
+          <span class="badge" [ngClass]="{
+            'card-badge': t.paymentMethod === 'CARD', 
+            'paypal-badge': t.paymentMethod === 'PAYPAL',
+            'qr-badge': t.paymentMethod === 'QR',
+            'crypto-badge': t.paymentMethod === 'CRYPTO'
+          }">
             {{ t.paymentMethod }}
           </span>
         </td>
+        
         <td>
-          <span class="status-badge" [ngClass]="{'initiated': t.status === 'INITIATED'}">
+          <span class="status-badge" [ngClass]="{
+            'initiated': t.status === 'INITIATED',
+            'success': t.status === 'SUCCESS',
+            'failed': t.status === 'FAILED',
+            'created': t.status === 'CREATED'
+          }">
             {{ t.status }}
           </span>
         </td>
       </tr>
       
       <tr *ngIf="filteredTransactions.length === 0">
-        <td colspan="6" style="text-align: center; padding: 20px; color: #777;">
+        <td colspan="7" style="text-align: center; padding: 20px; color: #777;">
           Nema rezultata za pretragu "{{ searchText }}"
         </td>
       </tr>
     </tbody>
   </table>
+</div>
+
+<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <span class="close-btn" (click)="closeModal()">&times;</span>
+    
+    <h2>🔍 Detalji Transakcije #{{ selectedTransaction?.id }}</h2>
+    <div class="modal-grid" *ngIf="selectedTransaction">
+      
+      <div class="detail-item">
+        <label>Status:</label>
+        <span class="status-text" [ngClass]="selectedTransaction.status">
+          {{ selectedTransaction.status }}
+        </span>
+      </div>
+
+      <div class="detail-item">
+        <label>Iznos:</label>
+        <strong>{{ selectedTransaction.amount | number:'1.2-2' }} {{ selectedTransaction.currency }}</strong>
+      </div>
+
+      <div class="detail-item full-width" *ngIf="selectedTransaction.paymentMethod === 'CARD'">
+        <div class="card-preview">
+          <h4>💳 Podaci sa Kartice</h4>
+          <p><strong>Vlasnik:</strong> {{ selectedTransaction.cardHolder }}</p>
+          <p><strong>Broj Kartice:</strong> {{ selectedTransaction.pan }}</p>
+          <p><strong>Ističe:</strong> {{ selectedTransaction.expiryDate }}</p>
+          <p><strong>CVV:</strong> {{ selectedTransaction.cvv }}</p>
+        </div>
+      </div>
+
+      <div class="detail-item full-width">
+        <label>Vreme:</label>
+        <span>{{ selectedTransaction.merchantTimestamp | date:'medium' }}</span>
+      </div>
+
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn-close" (click)="closeModal()">Zatvori</button>
+    </div>
+  </div>
 </div>

@@ -15,6 +15,8 @@ export class TransactionListComponent implements OnInit {
   transactions: any[] = [];         // Svi podaci iz baze
   filteredTransactions: any[] = []; // Podaci koji se vide na ekranu
   searchText: string = '';          // Tekst koji korisnik kuca
+  selectedTransaction: any = null;
+  isModalOpen: boolean = false;
 
   constructor(private http: HttpClient) {}
 
@@ -46,4 +48,16 @@ export class TransactionListComponent implements OnInit {
       t.paymentMethod?.toLowerCase().includes(term)
     );
   }
+
+  // DODAJ OVE METODE NA KRAJ KLASE
+  openModal(transaction: any) {
+    this.selectedTransaction = transaction;
+    this.isModalOpen = true;
+  }
+
+  closeModal() {
+    this.isModalOpen = false;
+    this.selectedTransaction = null;
+  }
+
 }
