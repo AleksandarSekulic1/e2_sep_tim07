@@ -21,7 +21,6 @@ import java.util.Random;
 
 @RestController
 @RequestMapping("/transactions")
-//@CrossOrigin(origins = "*")
 public class TransactionController {
 
     @Autowired
@@ -35,7 +34,6 @@ public class TransactionController {
         return transactionRepository.findAll();
     }
 
-    // KORAK 1: Inicijalizacija (Web Shop šalje podatke)
     @PostMapping("/initiate") 
     public ResponseEntity<?> initiateTransaction(@RequestBody PaymentRequest request) {
         Optional<Merchant> merchantOpt = merchantRepository.findById(request.getMerchantId());
@@ -55,8 +53,6 @@ public class TransactionController {
         transaction.setMerchantId(request.getMerchantId());
         transaction.setAmount(request.getAmount());
         transaction.setCurrency(request.getCurrency());
-        
-        // BITNO: Ovde postavljamo ID koji nam je stigao sa Web Shop-a
         transaction.setMerchantOrderId(request.getMerchantOrderId());
         
         try {
@@ -93,22 +89,22 @@ public class TransactionController {
         return String.valueOf(number);
     }
 
-    // --- POPRAVLJEN WEBHOOK ---
+    // --- POPRAVLJEN WEBHOOK PREMA SPECIFIKACIJI ---
     @PutMapping("/update-status/{merchantOrderId}")
     @Transactional
     public ResponseEntity<?> updateTransactionStatus(
             @PathVariable String merchantOrderId, 
-            @RequestBody Map<String, String> statusUpdate) {
+            @RequestBody Map<String, Object> statusUpdate) {
         
         String cleanId = merchantOrderId.trim();
         System.out.println("🔔 CORE: Primio zahtev za ažuriranje ID: [" + cleanId + "]");
 
-        // 1. Pokušaj pretrage po koloni merchant_order_id
+        // 1. Primarna pretraga po merchant_order_id koloni
         Transaction transaction = transactionRepository.findByMerchantOrderId(cleanId);
         
-        // 2. Ako ne nađe (kao što se dešavalo), pretraži sve i uporedi sa STAN brojem ili ID-jem
+        // 2. Fallback pretraga (ako je pomešan STAN i ID)
         if (transaction == null) {
-            System.out.println("🔎 CORE: merchantOrderId nije upalio, pretražujem celu bazu...");
+            System.out.println("🔎 CORE: merchantOrderId nije upalio, pretražujem bazu po STAN-u/ID-ju...");
             List<Transaction> all = transactionRepository.findAll();
             transaction = all.stream()
                 .filter(t -> (t.getMerchantOrderId() != null && t.getMerchantOrderId().equals(cleanId)) || 
@@ -119,16 +115,33 @@ public class TransactionController {
         }
 
         if (transaction != null) {
-            String status = statusUpdate.get("status");
+            String status = (String) statusUpdate.get("status");
+            
             if ("SUCCESS".equalsIgnoreCase(status) || "PAID".equalsIgnoreCase(status)) {
+                // Ažuriranje statusa
                 transaction.setStatus("PAID");
+
+                // Čuvanje Global ID-ja iz Banke (Acquirer)
+                if (statusUpdate.containsKey("globalTransactionId")) {
+                    transaction.setGlobalTransactionId(statusUpdate.get("globalTransactionId").toString());
+                }
+
+                // Čuvanje Acquirer Timestamp-a
+                if (statusUpdate.containsKey("acquirerTimestamp")) {
+                    try {
+                        transaction.setAcquirerTimestamp(LocalDateTime.parse(statusUpdate.get("acquirerTimestamp").toString()));
+                    } catch (Exception e) {
+                        transaction.setAcquirerTimestamp(LocalDateTime.now());
+                    }
+                }
+
                 transactionRepository.saveAndFlush(transaction);
-                System.out.println("✅ CORE: Status USPEŠNO promenjen u PAID za transakciju: " + transaction.getId());
+                System.out.println("✅ CORE: Podaci uspešno sačuvani (Status, GlobalID, BankTimestamp).");
                 return ResponseEntity.ok().build();
             }
         }
 
-        System.out.println("❌ CORE: Transakcija [" + cleanId + "] nije pronađena ni nakon duboke pretrage.");
+        System.out.println("❌ CORE: Transakcija [" + cleanId + "] nije pronađena.");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
     }
 }

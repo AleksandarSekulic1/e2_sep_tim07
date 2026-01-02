@@ -25,14 +25,22 @@ export class TransactionListComponent implements OnInit {
   }
 
   loadTransactions() {
-    this.http.get<any[]>('http://localhost:8080/core/transactions')
+    // Vraćamo se na port 8080 (Gateway) jer on ima podešen CORS
+    // Dodajemo ?t=... na kraj da nateramo browser da uvek vuče nove podatke sa servera
+    const timestamp = new Date().getTime();
+    this.http.get<any[]>(`http://localhost:8080/core/transactions?t=${timestamp}`)
       .subscribe({
         next: (data) => {
-          this.transactions = data;
-          this.filteredTransactions = data; // U početku prikazujemo sve
-          console.log('Stigle transakcije:', data);
+          // Sortiramo tako da najnovija transakcija (sa najvećim ID-jem) bude prva
+          this.transactions = data.sort((a, b) => b.id - a.id);
+          this.filteredTransactions = [...this.transactions];
+          console.log('✅ Podaci stigli sa servera:', data);
         },
-        error: (err) => console.error('Greška:', err)
+        error: (err) => {
+          console.error('❌ Greška pri učitavanju preko Gateway-a:', err);
+          // Ako Gateway ne radi, pokušaj direktno (ali ovo će verovatno biti blokirano)
+          alert("Problem sa API Gateway-om. Proveri da li je startovan port 8080.");
+        }
       });
   }
 

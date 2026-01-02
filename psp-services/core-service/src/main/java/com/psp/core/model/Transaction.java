@@ -31,6 +31,7 @@ public class Transaction {
     private String stan; // System Trace Audit Number (6 cifara)
     private LocalDateTime pspTimestamp; // Vreme kad je PSP obradio zahtev
     private String globalTransactionId; // ID koji nam vraća banka
+    private LocalDateTime acquirerTimestamp; // <--- DODAJ OVO
 
     //@Transient // Ovo znači: "Ne čuvaj u bazu, samo koristi u memoriji"
     private String cardHolder;
@@ -43,7 +44,7 @@ public class Transaction {
     
     //@Transient
     private String cvv;
-    
+
     @Transient // Ne čuva se u istoriji transakcija, služi samo za proveru!
     private String merchantPassword;
 
