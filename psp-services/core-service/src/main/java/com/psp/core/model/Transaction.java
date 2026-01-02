@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transactions") // Ime tabele u Postgres-u
-@Data // Lombok generiše gettere, settere, toString...
+@Table(name = "transactions")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Transaction {
@@ -17,13 +17,19 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double amount;       // Iznos (npr. 100.50)
+    // Podaci iz Tabele 1 specifikacije 
+    private String merchantId;       // ID prodavca
+    private Double amount;           // Iznos
+    private String currency;         // Valuta (npr. EUR, RSD)
+    private String merchantOrderId;  // ID narudžbine sa Web Shopa
+    private LocalDateTime merchantTimestamp; // Vreme kreiranja na Web Shopu
     
-    private String currency;     // Valuta (npr. EUR, RSD)
+    // Naša interna polja
+    private String paymentMethod;    // CARD, QR, PAYPAL, CRYPTO [cite: 13]
+    private String status;           // INITIATED, SUCCESS, FAILED, ERROR
     
-    private String merchantId;   // ID prodavca kojem ide novac
-    
-    private String status;       // CREATED, COMPLETED, FAILED
-    
-    private LocalDateTime timestamp; // Vreme transakcije
+    // URL-ovi za redirekciju (čuvanje nije obavezno u bazi, ali korisno za logove)
+    private String successUrl;
+    private String failedUrl;
+    private String errorUrl;
 }
