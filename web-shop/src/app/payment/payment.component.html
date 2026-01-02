@@ -4,7 +4,7 @@
     <p style="text-align: center; color: #777; margin-bottom: 20px;">
       Popunite podatke za plaćanje rezervacije
     </p>
-  
+
     <form (ngSubmit)="initiatePayment()">
       
       <div class="form-group">
@@ -18,7 +18,7 @@
           placeholder="Unesite iznos (npr. 5000)"
           required>
       </div>
-  
+
       <div class="form-group">
         <label for="currency">Valuta:</label>
         <select 
@@ -31,7 +31,7 @@
           <option value="USD">USD (Američki Dolar)</option>
         </select>
       </div>
-  
+
       <div class="form-group">
         <label>Izaberite način plaćanja:</label>
         <div class="payment-methods">
@@ -48,13 +48,37 @@
           </div>
         </div>
       </div>
-  
+
+      <div *ngIf="transaction.paymentMethod === 'CARD'" class="card-details">
+        <h3>Podaci sa kartice</h3>
+        
+        <div class="form-group">
+          <label>Broj kartice (PAN)</label>
+          <input type="text" [(ngModel)]="transaction.pan" name="pan" class="form-control" placeholder="1234 5678 1234 5678">
+        </div>
+
+        <div class="form-group">
+          <label>Ime vlasnika</label>
+          <input type="text" [(ngModel)]="transaction.cardHolder" name="cardHolder" class="form-control" placeholder="PERA PERIC">
+        </div>
+
+        <div class="row-fields">
+          <div class="form-group">
+            <label>Datum (MM/YY)</label>
+            <input type="text" [(ngModel)]="transaction.expiryDate" name="expiryDate" class="form-control" placeholder="12/25">
+          </div>
+          <div class="form-group">
+            <label>CVV</label>
+            <input type="text" [(ngModel)]="transaction.cvv" name="cvv" class="form-control" placeholder="123">
+          </div>
+        </div>
+      </div>
       <button type="submit" class="btn-pay">
         PLATI {{ transaction.amount | number:'1.2-2' }} {{ transaction.currency }}
       </button>
-  
+
     </form>
-  
+
     <div *ngIf="responseMessage" class="status-box" [ngClass]="isError ? 'error' : 'success'">
       {{ responseMessage }}
     </div>

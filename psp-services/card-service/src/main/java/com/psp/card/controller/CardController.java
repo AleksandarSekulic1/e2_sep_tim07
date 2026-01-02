@@ -9,10 +9,13 @@ public class CardController {
 
     @PostMapping("/pay")
     public String processPayment(@RequestBody CardPaymentRequest request) {
-        // OVDE ĆE KASNIJE BITI LOGIKA ZA BANKU (Validacija PAN-a, Datuma...)
-        System.out.println("Card Service primio zahtev: " + request);
+        // Ispis u konzolu (da vidimo da li radi)
+        System.out.println(">>> STIGAO ZAHTEV ZA PLAĆANJE <<<");
+        System.out.println("Iznos: " + request.getAmount() + " " + request.getCurrency());
+        System.out.println("PAN: " + request.getPan());
+        System.out.println("Vlasnik: " + request.getCardHolder());
+        System.out.println("CVV: " + request.getCvv());
         
-        // Za sada samo simuliramo uspeh
         return "SUCCESS";
     }
 }

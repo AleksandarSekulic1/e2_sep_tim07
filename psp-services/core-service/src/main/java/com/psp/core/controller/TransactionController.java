@@ -33,12 +33,16 @@ public class TransactionController {
         // 2. Proveri metodu plaćanja
         if ("CARD".equals(transaction.getPaymentMethod())) {
             try {
-                // Pakujemo podatke za slanje
+                // Pakujemo podatke za slanje (ISPRAVLJENO: Sada je čisto i bez dupliranja)
                 PaymentRequest request = new PaymentRequest(
                     transaction.getAmount(),
                     transaction.getCurrency(),
                     transaction.getMerchantOrderId(),
-                    transaction.getMerchantTimestamp().toString()
+                    transaction.getMerchantTimestamp() != null ? transaction.getMerchantTimestamp().toString() : null,
+                    transaction.getCardHolder(),
+                    transaction.getPan(),
+                    transaction.getExpiryDate(),
+                    transaction.getCvv()
                 );
 
                 // 3. Šaljemo zahtev ka CARD servisu (Port 8082)

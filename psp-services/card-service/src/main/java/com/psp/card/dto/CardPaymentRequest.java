@@ -8,4 +8,8 @@ public class CardPaymentRequest {
     private String currency;
     private String merchantOrderId;
     private String merchantTimestamp;
+    private String cardHolder;
+    private String pan;
+    private String expiryDate;
+    private String cvv;
 }

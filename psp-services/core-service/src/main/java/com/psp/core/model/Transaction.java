@@ -28,6 +28,18 @@ public class Transaction {
     private String paymentMethod;    // CARD, QR, PAYPAL, CRYPTO [cite: 13]
     private String status;           // INITIATED, SUCCESS, FAILED, ERROR
     
+    @Transient // Ovo znači: "Ne čuvaj u bazu, samo koristi u memoriji"
+    private String cardHolder;
+    
+    @Transient
+    private String pan;
+    
+    @Transient
+    private String expiryDate;
+    
+    @Transient
+    private String cvv;
+    
     // URL-ovi za redirekciju (čuvanje nije obavezno u bazi, ali korisno za logove)
     private String successUrl;
     private String failedUrl;

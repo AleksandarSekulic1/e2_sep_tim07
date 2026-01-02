@@ -24,7 +24,11 @@ export class PaymentComponent {
     merchantTimestamp: '',
     successUrl: 'http://localhost:4200/success',
     failedUrl: 'http://localhost:4200/failed',
-    errorUrl: 'http://localhost:4200/error'
+    errorUrl: 'http://localhost:4200/error',
+    pan: '',
+    cardHolder: '',
+    expiryDate: '',
+    cvv: ''
   };
 
   paymentMethods = [
