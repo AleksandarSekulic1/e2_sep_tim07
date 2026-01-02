@@ -1,28 +1,16 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { PaymentComponent } from './payment/payment.component'; // <--- DODAJ OVO
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, PaymentComponent], // <--- DODAJ OVO
   template: `
-    <div style="text-align:center; margin-top: 50px;">
-      <h1>Dobrodošao u Web Shop!</h1>
-      <button (click)="testConnection()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
-        TESTIRAJ KONEKCIJU SA GATEWAY-OM
-      </button>
-    </div>
-  `,
+    <h1 style="text-align:center">Dobrodošli u Agenciju za iznajmljivanje vozila [cite: 4]</h1>
+    <app-payment></app-payment> `,
   styles: []
 })
 export class AppComponent {
   title = 'web-shop';
-
-  testConnection() {
-    // Ovo je jednostavan JavaScript fetch poziv ka tvom Gateway-u
-    fetch('http://localhost:8080/core/test')
-      .then(response => response.text())
-      .then(data => alert('USPEH! Odgovor sa bekenda: ' + data))
-      .catch(error => alert('GREŠKA: ' + error));
-  }
 }

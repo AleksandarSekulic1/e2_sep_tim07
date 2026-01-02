@@ -1,0 +1,39 @@
+<div class="container" style="max-width: 500px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
+  <h2>Kupovina Usluge (Web Shop)</h2>
+  
+  <form (ngSubmit)="initiatePayment()">
+    
+    <div style="margin-bottom: 15px;">
+      <label>Iznos:</label>
+      <input type="number" [(ngModel)]="transaction.amount" name="amount" class="form-control" required>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label>Valuta:</label>
+      <select [(ngModel)]="transaction.currency" name="currency" class="form-control">
+        <option value="RSD">RSD</option>
+        <option value="EUR">EUR</option>
+        <option value="USD">USD</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label>Način plaćanja:</label>
+      <div *ngFor="let method of paymentMethods">
+        <label>
+          <input type="radio" name="paymentMethod" [(ngModel)]="transaction.paymentMethod" [value]="method.value">
+          {{ method.label }}
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer;">
+      PLATI
+    </button>
+
+  </form>
+
+  <div *ngIf="responseMessage" style="margin-top: 20px; font-weight: bold;">
+    Status: {{ responseMessage }}
+  </div>
+</div>

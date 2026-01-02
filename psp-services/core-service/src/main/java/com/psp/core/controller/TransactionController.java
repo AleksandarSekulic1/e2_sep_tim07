@@ -5,30 +5,31 @@ import com.psp.core.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/transactions") // Osnovna putanja: /transactions
+@RequestMapping("/transactions")
 public class TransactionController {
 
     @Autowired
     private TransactionRepository transactionRepository;
 
-    // 1. GET metoda: Vraća sve transakcije iz baze
+    // GET: Vraća sve transakcije
     @GetMapping
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
     }
 
-    // 2. POST metoda: Kreira novu transakciju
+    // POST: Kreira novu transakciju (podaci stižu sa Web Shopa)
     @PostMapping
     public Transaction createTransaction(@RequestBody Transaction transaction) {
-        // Postavljamo vreme i status pre čuvanja
-        transaction.setTimestamp(LocalDateTime.now());
-        transaction.setStatus("CREATED");
+        // Više ne postavljamo ručno timestamp ovde jer nam "merchantTimestamp"
+        // stiže direktno sa Web Shopa (Angulara).
         
-        // Čuvanje u bazu (Hibernate radi INSERT)
+        // Postavljamo početni status
+        transaction.setStatus("INITIATED"); 
+        
+        // Čuvamo u bazu
         return transactionRepository.save(transaction);
     }
 }
