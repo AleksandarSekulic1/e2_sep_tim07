@@ -73,6 +73,13 @@
         <strong>{{ selectedTransaction.amount | number:'1.2-2' }} {{ selectedTransaction.currency }}</strong>
       </div>
 
+      <div class="detail-item full-width" *ngIf="selectedTransaction.status === 'FAILED'">
+        <div style="background-color: #fff5f5; border: 1px solid #feb2b2; padding: 12px; border-radius: 8px; color: #c53030;">
+          <h4 style="margin-top: 0; color: #9b2c2c; margin-bottom: 5px;">⚠️ Razlog odbijanja</h4>
+          <strong>{{ selectedTransaction.reason || 'Sistemska greška ili prekid komunikacije' }}</strong>
+        </div>
+      </div>
+
       <div class="detail-item full-width">
          <div class="bank-info-box">
             <h4 class="bank-title">🏦 Bankarski Zapisi (Acquirer / Banka)</h4>
@@ -87,7 +94,7 @@
                     <p>{{ selectedTransaction.merchantOrderId }}</p>
                 </div>
 
-                <div class="info-group full-width-group">
+                <div class="info-group full-width-group" *ngIf="selectedTransaction.status === 'PAID'">
                     <small>GLOBAL TRANSACTION ID:</small>
                     <p class="break-all"><strong>{{ selectedTransaction.globalTransactionId }}</strong></p>
                 </div>
