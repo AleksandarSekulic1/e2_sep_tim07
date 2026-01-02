@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    // Ovde možemo dodati metode tipa: findByMerchantId(String id), ali za sad nam ne treba ništa.
-    // JpaRepository već ima save(), findAll(), findById()...
+    
+    // --- DODAJ OVO ---
+    Transaction findByMerchantOrderId(String merchantOrderId);
+    
 }

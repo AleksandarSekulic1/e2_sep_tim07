@@ -23,7 +23,8 @@ export class BankPaymentComponent implements OnInit {
     cardHolder: '',
     expiryDate: '',
     cvv: '',
-    amount: 5000 // Ovo bi trebalo da stigne sa backenda, ali za sad hardkodujemo
+    amount: 5000,
+    merchantOrderId: '' // <--- NOVO POLJE
   };
 
   message = '';
@@ -38,7 +39,13 @@ export class BankPaymentComponent implements OnInit {
     const amountParam = this.route.snapshot.queryParamMap.get('amount');
     if (amountParam) this.cardData.amount = Number(amountParam);
 
-    // --- IZMENA: Hvatamo URL-ove ---
+    // --- IZMENA: Hvatamo i ID transakcije ---
+    const orderIdParam = this.route.snapshot.queryParamMap.get('merchantOrderId');
+    if (orderIdParam) {
+        this.cardData.merchantOrderId = orderIdParam;
+        console.log("ID Transakcije uhvaćen:", this.cardData.merchantOrderId);
+    }
+
     this.successUrl = this.route.snapshot.queryParamMap.get('successUrl') || '';
     this.failedUrl = this.route.snapshot.queryParamMap.get('failedUrl') || '';
   }

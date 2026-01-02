@@ -3,6 +3,7 @@ package com.bank.controller;
 import com.bank.dto.PaymentUrlRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate; // <--- OBAVEZNO IMPORTUJ OVO
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +21,10 @@ public class BankController {
         
         String paymentId = UUID.randomUUID().toString();
         // URL ka tvom Angular Bank ekranu
-        String paymentUrl = "http://localhost:4200/bank-payment/" + paymentId + "?amount=" + request.getAmount();
-        Map<String, String> response = new HashMap<>();
+        String paymentUrl = "http://localhost:4200/bank-payment/" + paymentId + 
+                            "?amount=" + request.getAmount() + 
+                            "&merchantOrderId=" + request.getMerchantOrderId();
+         Map<String, String> response = new HashMap<>();
         response.put("paymentId", paymentId);
         response.put("paymentUrl", paymentUrl);
 
@@ -33,26 +36,45 @@ public class BankController {
     public ResponseEntity<?> processPayment(@RequestBody Map<String, Object> paymentData) {
         String pan = (String) paymentData.get("pan");
         String cardHolder = (String) paymentData.get("cardHolder");
-        // Pazimo na tipove podataka (JSON brojevi mogu biti Integer ili Double)
         Double amount = Double.valueOf(paymentData.get("amount").toString());
+        
+        // Čitamo ID transakcije koji smo dobili od Frontenda
+        String merchantOrderId = (String) paymentData.get("merchantOrderId");
 
-        System.out.println("🏦 BANKA: Obrada plaćanja za: " + cardHolder + " | Iznos: " + amount);
-        System.out.println("💳 PAN: " + pan);
+        System.out.println("🏦 BANKA: Obrada za ID: " + merchantOrderId + " | Iznos: " + amount);
 
-        // A) Provera Lunovog algoritma
+        // A) Lunov test (isto kao pre)
         if (!luhnCheck(pan)) {
-            System.out.println("❌ BANKA: Neispravan broj kartice (Lun test neuspešan)");
-            return ResponseEntity.badRequest().body("Neispravan broj kartice (Lun test failed)");
+            return ResponseEntity.badRequest().body("Neispravan broj kartice");
         }
 
-        // B) Provera sredstava (Hardkodovano pravilo: Ako je iznos > 20000, odbij)
+        // B) Provera sredstava (isto kao pre)
         if (amount > 20000) {
-            System.out.println("❌ BANKA: Nedovoljno sredstava na računu");
             return ResponseEntity.badRequest().body("Nedovoljno sredstava");
         }
 
-        // C) Uspeh
-        System.out.println("✅ BANKA: Transakcija uspešna!");
+        // C) Uspeh - Sada javljamo Core servisu!
+        System.out.println("✅ BANKA: Transakcija uspešna! Obaveštavam Core servis...");
+
+        try {
+        // MENJAMO PORT SA 8080 NA 8081 (Direktno na Core servis)
+        // Takođe proveravamo da li je putanja tačna: /transactions/update-status/
+        String coreUrl = "http://localhost:8081/transactions/update-status/" + merchantOrderId;
+        
+        Map<String, String> statusUpdate = new HashMap<>();
+        statusUpdate.put("status", "PAID");
+
+        RestTemplate restTemplate = new RestTemplate();
+        // Koristimo .put jer je u TransactionControlleru definisano kao @PutMapping
+        restTemplate.put(coreUrl, statusUpdate);
+        
+        System.out.println("📞 BANKA -> CORE: Obaveštenje poslato direktno na 8081!");
+
+    } catch (Exception e) {
+        System.err.println("⚠️ Greška pri javljanju Core servisu: " + e.getMessage());
+    }
+
+        // Vraćamo uspeh Frontendu
         Map<String, String> successResponse = new HashMap<>();
         successResponse.put("status", "SUCCESS");
         successResponse.put("message", "Transakcija odobrena");

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.Random;
 
 @RestController
 @RequestMapping("/transactions")
+//@CrossOrigin(origins = "*")
 public class TransactionController {
 
     @Autowired
@@ -36,8 +38,6 @@ public class TransactionController {
     // KORAK 1: Inicijalizacija (Web Shop šalje podatke)
     @PostMapping("/initiate") 
     public ResponseEntity<?> initiateTransaction(@RequestBody PaymentRequest request) {
-
-        // --- 0. BEZBEDNOSNA PROVERA ---
         Optional<Merchant> merchantOpt = merchantRepository.findById(request.getMerchantId());
 
         if (merchantOpt.isEmpty()) {
@@ -49,18 +49,16 @@ public class TransactionController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Pogrešna lozinka");
         }
         
-        System.out.println("✅ AUTH USPEŠAN: Zahtev od " + merchant.getName());
+        System.out.println("✅ CORE: AUTH USPEŠAN za " + merchant.getName());
 
-        // --- 1. KREIRANJE TRANSAKCIJE ---
         Transaction transaction = new Transaction();
         transaction.setMerchantId(request.getMerchantId());
-        // transaction.setMerchantPassword(request.getMerchantPassword()); // Nije bezbedno čuvati pass u bazi transakcija
         transaction.setAmount(request.getAmount());
         transaction.setCurrency(request.getCurrency());
+        
+        // BITNO: Ovde postavljamo ID koji nam je stigao sa Web Shop-a
         transaction.setMerchantOrderId(request.getMerchantOrderId());
         
-        // Konverzija String timestamp-a u LocalDateTime (pazi na format koji šalje WebShop)
-        // Ako puca, koristi LocalDateTime.now() privremeno
         try {
             transaction.setMerchantTimestamp(LocalDateTime.parse(request.getMerchantTimestamp()));
         } catch (Exception e) {
@@ -77,10 +75,6 @@ public class TransactionController {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // --- 2. VRAĆAMO ODGOVOR WEB SHOP-U ---
-        // Vraćamo URL ka PSP Frontendu gde korisnik bira metodu.
-        // Web Shop radi redirect na: http://localhost:4200/payment-methods/{pspTransactionId}
-        
         Map<String, Object> response = new HashMap<>();
         response.put("pspTransactionId", savedTransaction.getId());
         response.put("paymentUrl", "http://localhost:4200/payment-methods/" + savedTransaction.getId());
@@ -88,7 +82,6 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
     
-    // Endpoint da Frontend može da dohvati podatke o ceni
     @GetMapping("/{id}")
     public ResponseEntity<?> getTransactionDetails(@PathVariable Long id) {
         return ResponseEntity.ok(transactionRepository.findById(id));
@@ -98,5 +91,44 @@ public class TransactionController {
         Random random = new Random();
         int number = random.nextInt(900000) + 100000;
         return String.valueOf(number);
+    }
+
+    // --- POPRAVLJEN WEBHOOK ---
+    @PutMapping("/update-status/{merchantOrderId}")
+    @Transactional
+    public ResponseEntity<?> updateTransactionStatus(
+            @PathVariable String merchantOrderId, 
+            @RequestBody Map<String, String> statusUpdate) {
+        
+        String cleanId = merchantOrderId.trim();
+        System.out.println("🔔 CORE: Primio zahtev za ažuriranje ID: [" + cleanId + "]");
+
+        // 1. Pokušaj pretrage po koloni merchant_order_id
+        Transaction transaction = transactionRepository.findByMerchantOrderId(cleanId);
+        
+        // 2. Ako ne nađe (kao što se dešavalo), pretraži sve i uporedi sa STAN brojem ili ID-jem
+        if (transaction == null) {
+            System.out.println("🔎 CORE: merchantOrderId nije upalio, pretražujem celu bazu...");
+            List<Transaction> all = transactionRepository.findAll();
+            transaction = all.stream()
+                .filter(t -> (t.getMerchantOrderId() != null && t.getMerchantOrderId().equals(cleanId)) || 
+                             (t.getStan() != null && t.getStan().equals(cleanId)) ||
+                             (t.getId() != null && String.valueOf(t.getId()).equals(cleanId)))
+                .findFirst()
+                .orElse(null);
+        }
+
+        if (transaction != null) {
+            String status = statusUpdate.get("status");
+            if ("SUCCESS".equalsIgnoreCase(status) || "PAID".equalsIgnoreCase(status)) {
+                transaction.setStatus("PAID");
+                transactionRepository.saveAndFlush(transaction);
+                System.out.println("✅ CORE: Status USPEŠNO promenjen u PAID za transakciju: " + transaction.getId());
+                return ResponseEntity.ok().build();
+            }
+        }
+
+        System.out.println("❌ CORE: Transakcija [" + cleanId + "] nije pronađena ni nakon duboke pretrage.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
     }
 }
