@@ -1,15 +1,13 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { PaymentComponent } from './payment/payment.component'; // <--- DODAJ OVO
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router'; // <--- OBAVEZNO DODAJ OVO
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, PaymentComponent], // <--- DODAJ OVO
-  template: `
-    <h1 style="text-align:center">Dobrodošli u Agenciju za iznajmljivanje vozila [cite: 4]</h1>
-    <app-payment></app-payment> `,
-  styles: []
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive], // <--- I OVDE
+  templateUrl: './app.component.html', // Prebacujemo HTML u poseban fajl da bude čistije
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
   title = 'web-shop';

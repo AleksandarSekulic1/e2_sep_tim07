@@ -1,0 +1,63 @@
+.list-container {
+  max-width: 1200px; /* Šira tabela */
+  margin: 40px auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+/* STIL ZA SEARCH BOX */
+.search-box {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 15px;
+  font-size: 1.2rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+}
+
+/* TABELA */
+.styled-table {
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 1.1em; /* Veća slova u tabeli */
+  min-width: 100%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.styled-table thead tr {
+  background-color: #2c3e50;
+  color: #ffffff;
+  text-align: left;
+}
+
+.styled-table th, .styled-table td {
+  padding: 18px 20px; /* Više prostora u ćelijama */
+  border-bottom: 1px solid #dddddd;
+}
+
+/* Ostalo ostaje isto... */
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+.badge { padding: 6px 12px; border-radius: 4px; font-weight: bold; }
+.card-badge { background-color: #ffc107; color: #333; }
+.paypal-badge { background-color: #0070ba; color: white; }
+.status-badge { font-weight: bold; color: #555; }
+.initiated { color: #007bff; }

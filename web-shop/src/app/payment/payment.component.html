@@ -1,39 +1,62 @@
-<div class="container" style="max-width: 500px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
-  <h2>Kupovina Usluge (Web Shop)</h2>
+<div class="payment-container">
+  <div class="card">
+    <h2>💳 Agencija za Iznajmljivanje</h2>
+    <p style="text-align: center; color: #777; margin-bottom: 20px;">
+      Popunite podatke za plaćanje rezervacije
+    </p>
   
-  <form (ngSubmit)="initiatePayment()">
-    
-    <div style="margin-bottom: 15px;">
-      <label>Iznos:</label>
-      <input type="number" [(ngModel)]="transaction.amount" name="amount" class="form-control" required>
-    </div>
-
-    <div style="margin-bottom: 15px;">
-      <label>Valuta:</label>
-      <select [(ngModel)]="transaction.currency" name="currency" class="form-control">
-        <option value="RSD">RSD</option>
-        <option value="EUR">EUR</option>
-        <option value="USD">USD</option>
-      </select>
-    </div>
-
-    <div style="margin-bottom: 15px;">
-      <label>Način plaćanja:</label>
-      <div *ngFor="let method of paymentMethods">
-        <label>
-          <input type="radio" name="paymentMethod" [(ngModel)]="transaction.paymentMethod" [value]="method.value">
-          {{ method.label }}
-        </label>
+    <form (ngSubmit)="initiatePayment()">
+      
+      <div class="form-group">
+        <label for="amount">Iznos za uplatu:</label>
+        <input 
+          type="number" 
+          id="amount" 
+          [(ngModel)]="transaction.amount" 
+          name="amount" 
+          class="form-control" 
+          placeholder="Unesite iznos (npr. 5000)"
+          required>
       </div>
+  
+      <div class="form-group">
+        <label for="currency">Valuta:</label>
+        <select 
+          id="currency" 
+          [(ngModel)]="transaction.currency" 
+          name="currency" 
+          class="form-control">
+          <option value="RSD">RSD (Srpski Dinar)</option>
+          <option value="EUR">EUR (Euro)</option>
+          <option value="USD">USD (Američki Dolar)</option>
+        </select>
+      </div>
+  
+      <div class="form-group">
+        <label>Izaberite način plaćanja:</label>
+        <div class="payment-methods">
+          <div *ngFor="let method of paymentMethods" class="radio-group">
+            <input 
+              type="radio" 
+              [id]="method.value" 
+              name="paymentMethod" 
+              [(ngModel)]="transaction.paymentMethod" 
+              [value]="method.value">
+            <label [for]="method.value" style="margin:0; cursor: pointer; width: 100%;">
+              {{ method.label }}
+            </label>
+          </div>
+        </div>
+      </div>
+  
+      <button type="submit" class="btn-pay">
+        PLATI {{ transaction.amount | number:'1.2-2' }} {{ transaction.currency }}
+      </button>
+  
+    </form>
+  
+    <div *ngIf="responseMessage" class="status-box" [ngClass]="isError ? 'error' : 'success'">
+      {{ responseMessage }}
     </div>
-
-    <button type="submit" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer;">
-      PLATI
-    </button>
-
-  </form>
-
-  <div *ngIf="responseMessage" style="margin-top: 20px; font-weight: bold;">
-    Status: {{ responseMessage }}
   </div>
 </div>

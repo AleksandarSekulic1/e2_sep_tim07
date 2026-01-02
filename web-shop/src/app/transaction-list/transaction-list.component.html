@@ -1,0 +1,50 @@
+<div class="list-container">
+  <h2>📋 Istorija Transakcija</h2>
+
+  <div class="search-box">
+    <input 
+      type="text" 
+      placeholder="🔍 Pretraži po ID-u, Iznosu ili Statusu..." 
+      [(ngModel)]="searchText" 
+      (input)="filterData()"
+      class="search-input"
+    >
+  </div>
+  
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Prodavnica ID</th>
+        <th>Iznos</th>
+        <th>Valuta</th>
+        <th>Metoda</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let t of filteredTransactions">
+        <td>{{ t.id }}</td>
+        <td>{{ t.merchantOrderId }}</td>
+        <td>{{ t.amount | number:'1.2-2' }}</td>
+        <td>{{ t.currency }}</td>
+        <td>
+          <span class="badge" [ngClass]="{'card-badge': t.paymentMethod === 'CARD', 'paypal-badge': t.paymentMethod === 'PAYPAL'}">
+            {{ t.paymentMethod }}
+          </span>
+        </td>
+        <td>
+          <span class="status-badge" [ngClass]="{'initiated': t.status === 'INITIATED'}">
+            {{ t.status }}
+          </span>
+        </td>
+      </tr>
+      
+      <tr *ngIf="filteredTransactions.length === 0">
+        <td colspan="6" style="text-align: center; padding: 20px; color: #777;">
+          Nema rezultata za pretragu "{{ searchText }}"
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
