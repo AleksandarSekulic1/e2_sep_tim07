@@ -1,0 +1,37 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.brand-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffc107; /* Zuta boja za brend */
+}
+
+.navbar-links a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  font-size: 1.1rem;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.navbar-links a:hover {
+  background-color: #555;
+}
+
+.navbar-links a.active {
+  background-color: #007bff; /* Plava za aktivni tab */
+}
+
+.content-wrapper {
+  padding: 20px;
+}

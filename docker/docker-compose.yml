@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 1. Baza za PSP Core Servis (PostgreSQL)
+  # 1. Baza za PSP Core Servis
   psp-core-db:
     image: postgres:15-alpine
     container_name: psp-core-db
@@ -10,13 +10,13 @@ services:
       POSTGRES_PASSWORD: super
       POSTGRES_DB: psp_core_db
     ports:
-      - "5444:5432"  # <--- PROMENJENO: Mapiramo na port 5444 da izbegnemo tvoj lokalni Postgres
+      - "5444:5432"
     volumes:
       - psp_core_data:/var/lib/postgresql/data
     networks:
       - psp-network
 
-  # 2. Baza za Card/QR Servis (PostgreSQL)
+  # 2. Baza za Card/QR Servis
   psp-card-db:
     image: postgres:15-alpine
     container_name: psp-card-db
@@ -25,13 +25,28 @@ services:
       POSTGRES_PASSWORD: super
       POSTGRES_DB: psp_card_db
     ports:
-      - "5433:5432" # Ovo je OK, port 5433 je verovatno slobodan
+      - "5433:5432"
     volumes:
       - psp_card_data:/var/lib/postgresql/data
     networks:
       - psp-network
 
-  # 3. Baza za PayPal Servis (MongoDB)
+  # --- NOVO: 5. Baza za Bank Service (Simulator Banke) ---
+  bank-db:
+    image: postgres:15-alpine
+    container_name: bank-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super
+      POSTGRES_DB: bank_db     # Ime baze koju će Docker sam napraviti
+    ports:
+      - "5445:5432"            # Mapiramo na 5445 da se ne sudara sa ostalima
+    volumes:
+      - bank_data:/var/lib/postgresql/data
+    networks:
+      - psp-network
+
+  # 3. Baza za PayPal Servis
   paypal-mongo-db:
     image: mongo:6.0
     container_name: paypal-mongo-db
@@ -50,8 +65,8 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: psp-rabbitmq
     ports:
-      - "5672:5672"   # Glavni port za komunikaciju
-      - "15672:15672" # Port za Admin Panel (http://localhost:15672)
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
@@ -62,6 +77,7 @@ volumes:
   psp_core_data:
   psp_card_data:
   paypal_data:
+  bank_data:      # <--- Dodajemo novi volumen
 
 networks:
   psp-network:

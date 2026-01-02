@@ -1,0 +1,124 @@
+<div class="list-container">
+  <h2>📋 Istorija Transakcija</h2>
+
+  <div class="search-box">
+    <input 
+      type="text" 
+      placeholder="🔍 Pretraži po ID-u, Iznosu ili Statusu..." 
+      [(ngModel)]="searchText" 
+      (input)="filterData()"
+      class="search-input"
+    >
+  </div>
+  
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Vreme</th> 
+        <th>Prodavnica ID</th>
+        <th>Iznos</th>
+        <th>Valuta</th>
+        <th>Metoda</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let t of filteredTransactions" (click)="openModal(t)" class="clickable-row">
+        <td>{{ t.id }}</td>
+        <td style="font-size: 0.9em; color: #555;">
+          {{ t.merchantTimestamp | date:'dd.MM.yyyy HH:mm' }}
+        </td>
+        <td>{{ t.merchantOrderId }}</td>
+        <td style="font-weight: bold;">
+          {{ t.amount | number:'1.2-2' }}
+        </td>
+        <td>{{ t.currency }}</td>
+        <td>
+          <span class="badge" [ngClass]="{
+            'card-badge': t.paymentMethod === 'CARD', 
+            'paypal-badge': t.paymentMethod === 'PAYPAL',
+            'qr-badge': t.paymentMethod === 'QR'
+          }">
+            {{ t.paymentMethod }}
+          </span>
+        </td>
+        <td>
+          <span class="status-badge" [ngClass]="t.status.toLowerCase()">
+            {{ t.status }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <span class="close-btn" (click)="closeModal()">&times;</span>
+    
+    <h2>🔍 Detalji Transakcije #{{ selectedTransaction?.id }}</h2>
+    
+    <div class="modal-grid" *ngIf="selectedTransaction">
+      
+      <div class="detail-item">
+        <label>Trenutni Status:</label>
+        <span class="status-text" [ngClass]="selectedTransaction.status.toLowerCase()">
+          {{ selectedTransaction.status }}
+        </span>
+      </div>
+
+      <div class="detail-item">
+        <label>Iznos za naplatu:</label>
+        <strong>{{ selectedTransaction.amount | number:'1.2-2' }} {{ selectedTransaction.currency }}</strong>
+      </div>
+
+      <div class="detail-item full-width" *ngIf="selectedTransaction.status === 'FAILED'">
+        <div style="background-color: #fff5f5; border: 1px solid #feb2b2; padding: 12px; border-radius: 8px; color: #c53030;">
+          <h4 style="margin-top: 0; color: #9b2c2c; margin-bottom: 5px;">⚠️ Razlog odbijanja</h4>
+          <strong>{{ selectedTransaction.reason || 'Sistemska greška ili prekid komunikacije' }}</strong>
+        </div>
+      </div>
+
+      <div class="detail-item full-width">
+         <div class="bank-info-box">
+            <h4 class="bank-title">🏦 Bankarski Zapisi (Acquirer / Banka)</h4>
+            <div class="bank-grid">
+                <div class="info-group">
+                    <small>STAN (PSP AUDIT ID):</small>
+                    <p>{{ selectedTransaction.stan || 'N/A' }}</p>
+                </div>
+                
+                <div class="info-group">
+                    <small>WEBSHOP ORDER ID:</small>
+                    <p>{{ selectedTransaction.merchantOrderId }}</p>
+                </div>
+
+                <div class="info-group full-width-group" *ngIf="selectedTransaction.status === 'PAID'">
+                    <small>GLOBAL TRANSACTION ID:</small>
+                    <p class="break-all"><strong>{{ selectedTransaction.globalTransactionId }}</strong></p>
+                </div>
+
+                <div class="info-group full-width-group" *ngIf="selectedTransaction.acquirerTimestamp">
+                    <small>VREME OBRADE U BANCI (ACQUIRER TIMESTAMP):</small>
+                    <p><strong>{{ selectedTransaction.acquirerTimestamp | date:'dd.MM.yyyy HH:mm:ss' }}</strong></p>
+                </div>
+            </div>
+            <p class="psp-time" *ngIf="selectedTransaction.pspTimestamp">
+                <em>PSP Inicijalizovano: {{ selectedTransaction.pspTimestamp | date:'medium' }}</em>
+            </p>
+         </div>
+      </div>
+
+      <div class="detail-item full-width footer-info">
+        <label>Originalni zahtev (WebShop Timestamp):</label>
+        <span>{{ selectedTransaction.merchantTimestamp | date:'medium' }}</span>
+      </div>
+
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn-close" (click)="closeModal()">Zatvori detalje</button>
+    </div>
+  </div>
+</div>

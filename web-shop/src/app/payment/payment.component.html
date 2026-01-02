@@ -1,0 +1,45 @@
+<div class="payment-container">
+  <div class="card">
+    <h2>💳 Agencija za Iznajmljivanje</h2>
+    <p style="text-align: center; color: #777; margin-bottom: 20px;">
+      Inicijalizacija plaćanja rezervacije
+    </p>
+
+    <form (ngSubmit)="initiatePayment()">
+      
+      <div class="form-group">
+        <label for="amount">Iznos za uplatu:</label>
+        <input 
+          type="number" 
+          id="amount" 
+          [(ngModel)]="transaction.amount" 
+          name="amount" 
+          class="form-control" 
+          placeholder="Unesite iznos (npr. 5000)"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="currency">Valuta:</label>
+        <select 
+          id="currency" 
+          [(ngModel)]="transaction.currency" 
+          name="currency" 
+          class="form-control">
+          <option value="RSD">RSD (Srpski Dinar)</option>
+          <option value="EUR">EUR (Euro)</option>
+          <option value="USD">USD (Američki Dolar)</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-pay">
+        NASTAVI KA PLAĆANJU ({{ transaction.amount | number:'1.2-2' }} {{ transaction.currency }})
+      </button>
+
+    </form>
+
+    <div *ngIf="responseMessage" class="status-box" [ngClass]="isError ? 'error' : 'success'">
+      {{ responseMessage }}
+    </div>
+  </div>
+</div>

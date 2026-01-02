@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transactions") // Ime tabele u Postgres-u
-@Data // Lombok generiše gettere, settere, toString...
+@Table(name = "transactions")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Transaction {
@@ -17,13 +17,39 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double amount;       // Iznos (npr. 100.50)
+    // Podaci iz Tabele 1 specifikacije 
+    private String merchantId;       // ID prodavca
+    private Double amount;           // Iznos
+    private String currency;         // Valuta (npr. EUR, RSD)
+    private String merchantOrderId;  // ID narudžbine sa Web Shopa
+    private LocalDateTime merchantTimestamp; // Vreme kreiranja na Web Shopu
     
-    private String currency;     // Valuta (npr. EUR, RSD)
+    // Naša interna polja
+    private String paymentMethod;    // CARD, QR, PAYPAL, CRYPTO 
+    private String status;           // INITIATED, SUCCESS, FAILED, ERROR
     
-    private String merchantId;   // ID prodavca kojem ide novac
+    private String stan; // System Trace Audit Number (6 cifara)
+    private LocalDateTime pspTimestamp; // Vreme kad je PSP obradio zahtev
+    private String globalTransactionId; // ID koji nam vraća banka
+    private LocalDateTime acquirerTimestamp; // <--- DODAJ OVO
+
+    //@Transient // Ovo znači: "Ne čuvaj u bazu, samo koristi u memoriji"
+    private String cardHolder;
     
-    private String status;       // CREATED, COMPLETED, FAILED
+    //@Transient
+    private String pan;
     
-    private LocalDateTime timestamp; // Vreme transakcije
+    //@Transient
+    private String expiryDate;
+    
+    //@Transient
+    private String cvv;
+
+    @Transient // Ne čuva se u istoriji transakcija, služi samo za proveru!
+    private String merchantPassword;
+
+    // URL-ovi za redirekciju (čuvanje nije obavezno u bazi, ali korisno za logove)
+    private String successUrl;
+    private String failedUrl;
+    private String errorUrl;
 }

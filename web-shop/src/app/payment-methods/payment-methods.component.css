@@ -1,0 +1,27 @@
+.psp-container {
+    max-width: 800px;
+    margin: 50px auto;
+    text-align: center;
+    font-family: sans-serif;
+}
+.methods-grid {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+}
+.method-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    width: 150px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.method-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: #007bff;
+}
+.method-card .icon { font-size: 40px; margin-bottom: 10px; }
+.disabled { opacity: 0.5; pointer-events: none; }
