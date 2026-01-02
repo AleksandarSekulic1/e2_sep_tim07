@@ -1,14 +1,19 @@
 package com.psp.core.controller;
 
 import com.psp.core.dto.PaymentRequest;
+import com.psp.core.model.Merchant;
 import com.psp.core.model.Transaction;
+import com.psp.core.repository.MerchantRepository; // <--- NOVO
 import com.psp.core.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException; // <--- NOVO
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -20,6 +25,9 @@ public class TransactionController {
     private TransactionRepository transactionRepository;
 
     @Autowired
+    private MerchantRepository merchantRepository; // <--- NOVO
+
+    @Autowired
     private RestTemplate restTemplate;
 
     @GetMapping
@@ -29,12 +37,30 @@ public class TransactionController {
 
     @PostMapping
     public Transaction createTransaction(@RequestBody Transaction transaction) {
-        // 1. GENERISANJE PODATAKA PO SPECIFIKACIJI (STAN + TIMESTAMP)
-        transaction.setStatus("INITIATED");
-        transaction.setPspTimestamp(LocalDateTime.now()); // PSP Vreme
-        transaction.setStan(generateStan()); // Generiše random 6 cifara (npr. 123456)
         
-        // Čuvamo odmah da bismo imali ID i STAN u bazi pre slanja
+        // --- 0. BEZBEDNOSNA PROVERA (AUTHENTICATION) ---
+        // Proveravamo da li prodavnica postoji i da li je lozinka tačna
+        Optional<Merchant> merchantOpt = merchantRepository.findById(transaction.getMerchantId());
+        
+        if (merchantOpt.isEmpty()) {
+            System.out.println("❌ GREŠKA: Nepoznat Merchant ID: " + transaction.getMerchantId());
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Nepoznat prodavac");
+        }
+        
+        Merchant merchant = merchantOpt.get();
+        if (!merchant.getMerchantPassword().equals(transaction.getMerchantPassword())) {
+            System.out.println("❌ GREŠKA: Pogrešna lozinka za prodavca: " + transaction.getMerchantId());
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Pogrešna lozinka (API Key)");
+        }
+        
+        System.out.println("✅ AUTH USPEŠAN: Zahtev od " + merchant.getName());
+        // ------------------------------------------------
+
+        // 1. GENERISANJE PODATAKA
+        transaction.setStatus("INITIATED");
+        transaction.setPspTimestamp(LocalDateTime.now());
+        transaction.setStan(generateStan());
+        
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         // 2. Proveri metodu plaćanja
@@ -51,18 +77,14 @@ public class TransactionController {
                     transaction.getCvv()
                 );
 
-                // 3. Šaljemo zahtev ka CARD servisu
                 String response = restTemplate.postForObject(
                     "http://localhost:8082/cards/pay", 
                     request, 
                     String.class
                 );
 
-                // 4. Obrada odgovora
                 if ("SUCCESS".equals(response)) {
                     savedTransaction.setStatus("SUCCESS");
-                    // Pošto banka vraća samo String "SUCCESS", ovde ćemo simulirati
-                    // da nam je banka poslala Global ID (da ispoštujemo bazu podataka)
                     savedTransaction.setGlobalTransactionId(UUID.randomUUID().toString());
                 } else {
                     savedTransaction.setStatus("FAILED");
@@ -79,10 +101,9 @@ public class TransactionController {
         return savedTransaction;
     }
 
-    // --- Pomoćna funkcija za generisanje STAN-a (6 cifara) ---
     private String generateStan() {
         Random random = new Random();
-        int number = random.nextInt(900000) + 100000; // Opseg 100000 - 999999
+        int number = random.nextInt(900000) + 100000;
         return String.valueOf(number);
     }
 }

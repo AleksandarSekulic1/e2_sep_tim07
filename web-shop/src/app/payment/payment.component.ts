@@ -23,6 +23,7 @@ export class PaymentComponent {
     
     // Ovi podaci su sistemski
     merchantId: 'prodavnica-auto-rent', 
+    merchantPassword: 'tajna_sifra_123', // <--- DODAJ OVO (Mora da se poklapa sa onim u Javi)
     merchantOrderId: '',     
     merchantTimestamp: '',
     successUrl: 'http://localhost:4200/success',

@@ -43,6 +43,9 @@ public class Transaction {
     
     //@Transient
     private String cvv;
+    
+    @Transient // Ne čuva se u istoriji transakcija, služi samo za proveru!
+    private String merchantPassword;
 
     // URL-ovi za redirekciju (čuvanje nije obavezno u bazi, ali korisno za logove)
     private String successUrl;
