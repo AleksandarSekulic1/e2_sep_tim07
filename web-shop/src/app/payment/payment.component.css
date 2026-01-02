@@ -164,3 +164,38 @@ input[type="radio"] {
 .row-fields .form-group {
   flex: 1; /* Da dele prostor 50-50 */
 }
+
+/* Kontejner za input i ikonice */
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Pozicioniranje ikonica unutar inputa desno */
+.card-icons {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  pointer-events: none; /* Da ne smetaju pri kucanju */
+}
+
+.card-logo {
+  height: 20px;
+  transition: all 0.3s ease;
+  opacity: 0.5; /* Polu-providno kad nije aktivno */
+  filter: grayscale(100%); /* Crno-belo kad nije aktivno */
+}
+
+/* Kada prepoznamo karticu, ona postane u boji i jasna */
+.card-logo.active {
+  opacity: 1;
+  filter: grayscale(0%);
+  transform: scale(1.1);
+}
+
+/* Ostale kartice postanu još bleđe */
+.card-logo.faded {
+  opacity: 0.2;
+}

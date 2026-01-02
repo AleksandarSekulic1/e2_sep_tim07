@@ -54,7 +54,30 @@
         
         <div class="form-group">
           <label>Broj kartice (PAN)</label>
-          <input type="text" [(ngModel)]="transaction.pan" name="pan" class="form-control" placeholder="1234 5678 1234 5678">
+          <div class="input-with-icon">
+            <input 
+              type="text" 
+              [(ngModel)]="transaction.pan" 
+              (input)="detectCardType()" 
+              name="pan" 
+              class="form-control" 
+              placeholder="0000 0000 0000 0000"
+              maxlength="19">
+            
+            <div class="card-icons">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" 
+                   class="card-logo" 
+                   [class.active]="cardType === 'visa'"
+                   [class.faded]="cardType && cardType !== 'visa'"
+                   alt="Visa">
+              
+              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
+                   class="card-logo" 
+                   [class.active]="cardType === 'mastercard'"
+                   [class.faded]="cardType && cardType !== 'mastercard'"
+                   alt="Mastercard">
+            </div>
+          </div>
         </div>
 
         <div class="form-group">

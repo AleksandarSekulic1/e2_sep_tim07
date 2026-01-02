@@ -110,7 +110,20 @@
 
       <div class="detail-item full-width" *ngIf="selectedTransaction.paymentMethod === 'CARD'">
         <div class="card-preview">
-          <h4>💳 Podaci sa Kartice</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin-bottom: 10px;">
+              <h4 style="margin: 0; border: none;">💳 Podaci sa Kartice</h4>
+
+              <img *ngIf="selectedTransaction.pan?.startsWith('4')"
+                   src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" 
+                   style="height: 25px; background: white; padding: 2px 5px; border-radius: 4px;"
+                   alt="Visa">
+
+              <img *ngIf="selectedTransaction.pan?.startsWith('5') || selectedTransaction.pan?.startsWith('2')"
+                   src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
+                   style="height: 25px; background: white; padding: 2px 5px; border-radius: 4px;"
+                   alt="Mastercard">
+          </div>
+
           <p><strong>Vlasnik:</strong> {{ selectedTransaction.cardHolder }}</p>
           <p><strong>Broj Kartice:</strong> {{ selectedTransaction.pan }}</p>
           <p><strong>Ističe:</strong> {{ selectedTransaction.expiryDate }}</p>

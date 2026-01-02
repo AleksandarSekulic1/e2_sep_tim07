@@ -12,13 +12,16 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 })
 export class PaymentComponent {
 
+  // --- IZMENA: cardType je sada samostalna promenljiva (za UI) ---
+  cardType: string = ''; 
+
   // Ovi podaci se menjaju kroz formu
-  transaction = {
-    amount: null,            // Korisnik unosi
-    currency: 'RSD',         // Korisnik bira (default RSD)
-    paymentMethod: 'CARD',   // Korisnik bira (default CARD)
+  transaction: any = { // Dodao sam ': any' da TypeScript ne gnjavi previse
+    amount: null,            
+    currency: 'RSD',        
+    paymentMethod: 'CARD',   
     
-    // Ovi podaci su sistemski (korisnik ih ne vidi/ne menja)
+    // Ovi podaci su sistemski
     merchantId: 'prodavnica-auto-rent', 
     merchantOrderId: '',     
     merchantTimestamp: '',
@@ -29,6 +32,7 @@ export class PaymentComponent {
     cardHolder: '',
     expiryDate: '',
     cvv: ''
+    // cardType smo sklonili odavde jer ne ide na server
   };
 
   paymentMethods = [
@@ -52,8 +56,8 @@ export class PaymentComponent {
     }
 
     // 2. Popunjavanje sistemskih podataka pre slanja
-    this.transaction.merchantOrderId = Math.floor(Math.random() * 1000000).toString(); // Generisemo novi ID narudzbine
-    this.transaction.merchantTimestamp = new Date().toISOString(); // Trenutno vreme
+    this.transaction.merchantOrderId = Math.floor(Math.random() * 1000000).toString(); 
+    this.transaction.merchantTimestamp = new Date().toISOString(); 
 
     console.log('Šaljem zahtev:', this.transaction);
 
@@ -63,12 +67,7 @@ export class PaymentComponent {
         next: (response: any) => {
           console.log('Uspeh:', response);
           this.isError = false;
-          // Prikazujemo lepšu poruku korisniku
           this.responseMessage = `✅ Uspešno inicijalizovano! ID Transakcije: ${response.id}`;
-          
-          // Ovde ćemo kasnije dodati logiku:
-          // Ako je CARD -> Redirekcija na Card Servis
-          // Ako je PAYPAL -> Redirekcija na PayPal
         },
         error: (error) => {
           console.error('Greška:', error);
@@ -76,5 +75,28 @@ export class PaymentComponent {
           this.responseMessage = '❌ Greška pri komunikaciji sa serverom.';
         }
       });
+  }
+
+  // --- FUNKCIJA ZA PREPOZNAVANJE KARTICE ---
+  detectCardType() {
+    const pan = this.transaction.pan;
+    
+    // Resetujemo ako je prazno
+    if (!pan) {
+      this.cardType = '';
+      return;
+    }
+
+    // Visa počinje sa 4
+    if (pan.startsWith('4')) {
+      this.cardType = 'visa';
+    } 
+    // Mastercard počinje sa 5 ili 2
+    else if (pan.startsWith('5') || pan.startsWith('2')) {
+      this.cardType = 'mastercard';
+    } 
+    else {
+      this.cardType = '';
+    }
   }
 }
