@@ -76,6 +76,7 @@
     <span class="close-btn" (click)="closeModal()">&times;</span>
     
     <h2>🔍 Detalji Transakcije #{{ selectedTransaction?.id }}</h2>
+    
     <div class="modal-grid" *ngIf="selectedTransaction">
       
       <div class="detail-item">
@@ -90,6 +91,23 @@
         <strong>{{ selectedTransaction.amount | number:'1.2-2' }} {{ selectedTransaction.currency }}</strong>
       </div>
 
+      <div class="detail-item full-width" *ngIf="selectedTransaction.stan || selectedTransaction.globalTransactionId">
+         <div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; border: 1px solid #b0d4ff; margin-bottom: 10px;">
+            <h4 style="margin-top: 0; color: #0056b3; margin-bottom: 10px;">🏦 Bankarski Zapisi (Interno)</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <p *ngIf="selectedTransaction.stan" style="margin: 0;">
+                    <small>STAN:</small><br><strong>{{ selectedTransaction.stan }}</strong>
+                </p>
+                <p *ngIf="selectedTransaction.globalTransactionId" style="margin: 0; word-break: break-all;">
+                    <small>Global ID:</small><br><strong>{{ selectedTransaction.globalTransactionId }}</strong>
+                </p>
+            </div>
+            <p *ngIf="selectedTransaction.pspTimestamp" style="margin: 10px 0 0 0; font-size: 0.9em; color: #666;">
+                <em>PSP Vreme: {{ selectedTransaction.pspTimestamp | date:'medium' }}</em>
+            </p>
+         </div>
+      </div>
+
       <div class="detail-item full-width" *ngIf="selectedTransaction.paymentMethod === 'CARD'">
         <div class="card-preview">
           <h4>💳 Podaci sa Kartice</h4>
@@ -101,7 +119,7 @@
       </div>
 
       <div class="detail-item full-width">
-        <label>Vreme:</label>
+        <label>Vreme kreiranja (WebShop):</label>
         <span>{{ selectedTransaction.merchantTimestamp | date:'medium' }}</span>
       </div>
 

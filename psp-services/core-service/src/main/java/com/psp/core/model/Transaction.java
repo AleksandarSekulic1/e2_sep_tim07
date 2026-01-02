@@ -25,9 +25,13 @@ public class Transaction {
     private LocalDateTime merchantTimestamp; // Vreme kreiranja na Web Shopu
     
     // Naša interna polja
-    private String paymentMethod;    // CARD, QR, PAYPAL, CRYPTO [cite: 13]
+    private String paymentMethod;    // CARD, QR, PAYPAL, CRYPTO 
     private String status;           // INITIATED, SUCCESS, FAILED, ERROR
     
+    private String stan; // System Trace Audit Number (6 cifara)
+    private LocalDateTime pspTimestamp; // Vreme kad je PSP obradio zahtev
+    private String globalTransactionId; // ID koji nam vraća banka
+
     //@Transient // Ovo znači: "Ne čuvaj u bazu, samo koristi u memoriji"
     private String cardHolder;
     

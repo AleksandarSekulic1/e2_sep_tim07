@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/transactions")
@@ -17,7 +20,7 @@ public class TransactionController {
     private TransactionRepository transactionRepository;
 
     @Autowired
-    private RestTemplate restTemplate; // Naš telefon za zvanje drugih servisa
+    private RestTemplate restTemplate;
 
     @GetMapping
     public List<Transaction> getAllTransactions() {
@@ -26,14 +29,17 @@ public class TransactionController {
 
     @PostMapping
     public Transaction createTransaction(@RequestBody Transaction transaction) {
-        // 1. Postavi početni status
+        // 1. GENERISANJE PODATAKA PO SPECIFIKACIJI (STAN + TIMESTAMP)
         transaction.setStatus("INITIATED");
+        transaction.setPspTimestamp(LocalDateTime.now()); // PSP Vreme
+        transaction.setStan(generateStan()); // Generiše random 6 cifara (npr. 123456)
+        
+        // Čuvamo odmah da bismo imali ID i STAN u bazi pre slanja
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         // 2. Proveri metodu plaćanja
         if ("CARD".equals(transaction.getPaymentMethod())) {
             try {
-                // Pakujemo podatke za slanje (ISPRAVLJENO: Sada je čisto i bez dupliranja)
                 PaymentRequest request = new PaymentRequest(
                     transaction.getAmount(),
                     transaction.getCurrency(),
@@ -45,30 +51,38 @@ public class TransactionController {
                     transaction.getCvv()
                 );
 
-                // 3. Šaljemo zahtev ka CARD servisu (Port 8082)
+                // 3. Šaljemo zahtev ka CARD servisu
                 String response = restTemplate.postForObject(
                     "http://localhost:8082/cards/pay", 
                     request, 
                     String.class
                 );
 
-                // 4. Ažuriramo status na osnovu odgovora
+                // 4. Obrada odgovora
                 if ("SUCCESS".equals(response)) {
                     savedTransaction.setStatus("SUCCESS");
+                    // Pošto banka vraća samo String "SUCCESS", ovde ćemo simulirati
+                    // da nam je banka poslala Global ID (da ispoštujemo bazu podataka)
+                    savedTransaction.setGlobalTransactionId(UUID.randomUUID().toString());
                 } else {
                     savedTransaction.setStatus("FAILED");
                 }
 
             } catch (Exception e) {
-                // Ako pukne veza sa Card servisom
-                System.out.println("Greška pri komunikaciji sa Card servisom: " + e.getMessage());
+                System.out.println("Greška: " + e.getMessage());
                 savedTransaction.setStatus("ERROR");
             }
             
-            // Čuvamo novi status u bazu
             transactionRepository.save(savedTransaction);
         }
 
         return savedTransaction;
+    }
+
+    // --- Pomoćna funkcija za generisanje STAN-a (6 cifara) ---
+    private String generateStan() {
+        Random random = new Random();
+        int number = random.nextInt(900000) + 100000; // Opseg 100000 - 999999
+        return String.valueOf(number);
     }
 }
