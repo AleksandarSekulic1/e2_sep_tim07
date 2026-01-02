@@ -1,0 +1,63 @@
+<div class="bank-container">
+    <div class="bank-header">
+        <h2>🏦 ACQUIRER BANKA</h2>
+        <p>Sigurno plaćanje karticom</p>
+    </div>
+
+    <div class="payment-info">
+        <p>Iznos transakcije:</p>
+        <h3>{{ cardData.amount | number:'1.2-2' }} RSD</h3>
+    </div>
+
+    <form (ngSubmit)="submitPayment()" *ngIf="!isSuccess">
+        <div class="form-group">
+            <label>Broj kartice (PAN)</label>
+            
+            <div class="input-wrapper">
+                <input type="text" 
+                       [(ngModel)]="cardData.pan" 
+                       (input)="detectCardType()" 
+                       name="pan" 
+                       placeholder="0000 0000 0000 0000" 
+                       required
+                       class="pan-input">
+                
+                <div class="card-icons">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" 
+                         alt="Visa" 
+                         class="card-logo"
+                         [class.active]="cardType === 'visa'"
+                         [class.faded]="cardType && cardType !== 'visa'">
+
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
+                         alt="Mastercard" 
+                         class="card-logo"
+                         [class.active]="cardType === 'mastercard'"
+                         [class.faded]="cardType && cardType !== 'mastercard'">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Ime vlasnika</label>
+            <input type="text" [(ngModel)]="cardData.cardHolder" name="holder" placeholder="IME PREZIME" required>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Važi do (MM/YY)</label>
+                <input type="text" [(ngModel)]="cardData.expiryDate" name="expiry" placeholder="12/26" required>
+            </div>
+            <div class="form-group">
+                <label>CVV / CVC</label>
+                <input type="password" [(ngModel)]="cardData.cvv" name="cvv" placeholder="123" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-pay">POTVRDI PLAĆANJE</button>
+    </form>
+
+    <div *ngIf="message" class="alert" [ngClass]="isSuccess ? 'success' : 'error'">
+        {{ message }}
+    </div>
+</div>

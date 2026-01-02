@@ -2,29 +2,36 @@ package com.psp.core.config;
 
 import com.psp.core.model.Merchant;
 import com.psp.core.repository.MerchantRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    private final MerchantRepository merchantRepository;
-
-    public DataInitializer(MerchantRepository merchantRepository) {
-        this.merchantRepository = merchantRepository;
-    }
+    @Autowired
+    private MerchantRepository merchantRepository;
 
     @Override
     public void run(String... args) throws Exception {
-        // Ako prodavnica ne postoji, kreiraj je
-        if (!merchantRepository.existsById("prodavnica-auto-rent")) {
-            Merchant m = new Merchant(
-                "prodavnica-auto-rent", 
-                "tajna_sifra_123", 
-                "Agencija za Iznajmljivanje"
-            );
-            merchantRepository.save(m);
-            System.out.println("✅ KREIRAN TEST MERCHANT: prodavnica-auto-rent / tajna_sifra_123");
+        // Proveravamo da li naš test prodavac već postoji
+        String merchantId = "12345";
+        
+        if (merchantRepository.findById(merchantId).isEmpty()) {
+            System.out.println("--------------------------------------------");
+            System.out.println("⚠️ KREIRAM TEST PRODAVCA (MERCHANT) U BAZI ⚠️");
+            
+            Merchant merchant = new Merchant();
+            merchant.setMerchantId(merchantId);
+            merchant.setMerchantPassword("password"); // Mora se poklapati sa Frontend-om!
+            merchant.setName("Agencija za Iznajmljivanje (Web Shop)");
+            
+            merchantRepository.save(merchant);
+            
+            System.out.println("✅ Prodavac kreiran: ID=12345, PASS=password");
+            System.out.println("--------------------------------------------");
+        } else {
+            System.out.println("ℹ️ Test prodavac (12345) već postoji.");
         }
     }
 }

@@ -21,20 +21,27 @@ public class ApiGatewayApplication {
     @Bean
     public RouteLocator myRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
-            // Ruta za Core Service
+            // Ruta za Core Service (8081)
             .route("core-service", r -> r.path("/core/**")
                 .filters(f -> f.stripPrefix(1))
                 .uri("http://localhost:8081"))
             
-            // Ruta za Card Service
+            // Ruta za Card Service (8082)
             .route("card-service", r -> r.path("/card/**")
                 .filters(f -> f.stripPrefix(1))
                 .uri("http://localhost:8082"))
                 
-            // Ruta za PayPal Service
+            // Ruta za PayPal Service (8083)
             .route("paypal-service", r -> r.path("/paypal/**")
                 .filters(f -> f.stripPrefix(1))
                 .uri("http://localhost:8083"))
+
+            // --- NOVO: Ruta za Bank Service (Simulator) ---
+            // Svi zahtevi koji idu na /bank/... biće prosleđeni na port 8085
+            .route("bank-service", r -> r.path("/bank/**")
+                .filters(f -> f.stripPrefix(1))
+                .uri("http://localhost:8085"))
+                
             .build();
     }
 
@@ -43,7 +50,10 @@ public class ApiGatewayApplication {
     public CorsWebFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:4200"); // Dozvoljavamo samo Angular aplikaciji
+        config.addAllowedOrigin("http://localhost:4200"); // Angular PSP
+        // Ako ćeš imati i poseban frontend za banku (npr. na portu 4202), dodaj i njega:
+        config.addAllowedOrigin("http://localhost:4202"); 
+        
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         

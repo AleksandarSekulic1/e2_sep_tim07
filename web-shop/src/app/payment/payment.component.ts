@@ -1,52 +1,35 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { PaymentService } from '../services/payment.service'; // <--- Importuj servis
 
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule], // HttpClientModule više ne treba ovde jer je u app.config
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.css']
 })
 export class PaymentComponent {
 
-  // --- IZMENA: cardType je sada samostalna promenljiva (za UI) ---
-  cardType: string = ''; 
-
-  // Ovi podaci se menjaju kroz formu
-  transaction: any = { // Dodao sam ': any' da TypeScript ne gnjavi previse
-    amount: null,            
+  // Podaci za inicijalizaciju (Tabela 1 iz specifikacije)
+  transaction: any = {
+    amount: 5000,            // Podrazumevana vrednost
     currency: 'RSD',        
-    paymentMethod: 'CARD',   
-    
-    // Ovi podaci su sistemski
-    merchantId: 'prodavnica-auto-rent', 
-    merchantPassword: 'tajna_sifra_123', // <--- DODAJ OVO (Mora da se poklapa sa onim u Javi)
+    merchantId: '12345',     // Mora se poklapati sa onim u bazi (ako proveravaš)
+    merchantPassword: 'password', 
     merchantOrderId: '',     
     merchantTimestamp: '',
     successUrl: 'http://localhost:4200/success',
     failedUrl: 'http://localhost:4200/failed',
-    errorUrl: 'http://localhost:4200/error',
-    pan: '',
-    cardHolder: '',
-    expiryDate: '',
-    cvv: ''
-    // cardType smo sklonili odavde jer ne ide na server
+    errorUrl: 'http://localhost:4200/error'
   };
-
-  paymentMethods = [
-    { value: 'CARD', label: '💳 Platna Kartica' },
-    { value: 'QR', label: '📱 IPS QR Kod' },
-    { value: 'PAYPAL', label: '🅿️ PayPal' },
-    { value: 'CRYPTO', label: '₿ Kriptovaluta' }
-  ];
 
   responseMessage = '';
   isError = false;
 
-  constructor(private http: HttpClient) {}
+  // Ubacujemo servis u konstruktor
+  constructor(private paymentService: PaymentService) {}
 
   initiatePayment() {
     // 1. Validacija
@@ -56,48 +39,31 @@ export class PaymentComponent {
       return;
     }
 
-    // 2. Popunjavanje sistemskih podataka pre slanja
+    // 2. Popunjavanje sistemskih podataka
     this.transaction.merchantOrderId = Math.floor(Math.random() * 1000000).toString(); 
     this.transaction.merchantTimestamp = new Date().toISOString(); 
 
-    console.log('Šaljem zahtev:', this.transaction);
+    console.log('Šaljem zahtev ka Core servisu...', this.transaction);
 
-    // 3. Slanje na Gateway
-    this.http.post('http://localhost:8080/core/transactions', this.transaction)
-      .subscribe({
-        next: (response: any) => {
-          console.log('Uspeh:', response);
-          this.isError = false;
-          this.responseMessage = `✅ Uspešno inicijalizovano! ID Transakcije: ${response.id}`;
-        },
-        error: (error) => {
-          console.error('Greška:', error);
-          this.isError = true;
-          this.responseMessage = '❌ Greška pri komunikaciji sa serverom.';
+    // 3. Poziv servisa
+    this.paymentService.initiatePayment(this.transaction).subscribe({
+      next: (response: any) => {
+        console.log('Uspeh:', response);
+        this.isError = false;
+        
+        if (response.paymentUrl) {
+           // --- IZMENA OVDE: Dodajemo iznos na kraj linka ---
+           const finalUrl = `${response.paymentUrl}?amount=${this.transaction.amount}`;
+           
+           console.log("Preusmeravam na:", finalUrl);
+           window.location.href = finalUrl;
         }
-      });
-  }
-
-  // --- FUNKCIJA ZA PREPOZNAVANJE KARTICE ---
-  detectCardType() {
-    const pan = this.transaction.pan;
-    
-    // Resetujemo ako je prazno
-    if (!pan) {
-      this.cardType = '';
-      return;
-    }
-
-    // Visa počinje sa 4
-    if (pan.startsWith('4')) {
-      this.cardType = 'visa';
-    } 
-    // Mastercard počinje sa 5 ili 2
-    else if (pan.startsWith('5') || pan.startsWith('2')) {
-      this.cardType = 'mastercard';
-    } 
-    else {
-      this.cardType = '';
-    }
+      },
+      error: (error) => {
+        console.error('Greška:', error);
+        this.isError = true;
+        this.responseMessage = '❌ Greška pri komunikaciji sa serverom (Proveri API Gateway).';
+      }
+    });
   }
 }

@@ -2,7 +2,7 @@
   <div class="card">
     <h2>💳 Agencija za Iznajmljivanje</h2>
     <p style="text-align: center; color: #777; margin-bottom: 20px;">
-      Popunite podatke za plaćanje rezervacije
+      Inicijalizacija plaćanja rezervacije
     </p>
 
     <form (ngSubmit)="initiatePayment()">
@@ -32,72 +32,8 @@
         </select>
       </div>
 
-      <div class="form-group">
-        <label>Izaberite način plaćanja:</label>
-        <div class="payment-methods">
-          <div *ngFor="let method of paymentMethods" class="radio-group">
-            <input 
-              type="radio" 
-              [id]="method.value" 
-              name="paymentMethod" 
-              [(ngModel)]="transaction.paymentMethod" 
-              [value]="method.value">
-            <label [for]="method.value" style="margin:0; cursor: pointer; width: 100%;">
-              {{ method.label }}
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="transaction.paymentMethod === 'CARD'" class="card-details">
-        <h3>Podaci sa kartice</h3>
-        
-        <div class="form-group">
-          <label>Broj kartice (PAN)</label>
-          <div class="input-with-icon">
-            <input 
-              type="text" 
-              [(ngModel)]="transaction.pan" 
-              (input)="detectCardType()" 
-              name="pan" 
-              class="form-control" 
-              placeholder="0000 0000 0000 0000"
-              maxlength="19">
-            
-            <div class="card-icons">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" 
-                   class="card-logo" 
-                   [class.active]="cardType === 'visa'"
-                   [class.faded]="cardType && cardType !== 'visa'"
-                   alt="Visa">
-              
-              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
-                   class="card-logo" 
-                   [class.active]="cardType === 'mastercard'"
-                   [class.faded]="cardType && cardType !== 'mastercard'"
-                   alt="Mastercard">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Ime vlasnika</label>
-          <input type="text" [(ngModel)]="transaction.cardHolder" name="cardHolder" class="form-control" placeholder="PERA PERIC">
-        </div>
-
-        <div class="row-fields">
-          <div class="form-group">
-            <label>Datum (MM/YY)</label>
-            <input type="text" [(ngModel)]="transaction.expiryDate" name="expiryDate" class="form-control" placeholder="12/25">
-          </div>
-          <div class="form-group">
-            <label>CVV</label>
-            <input type="text" [(ngModel)]="transaction.cvv" name="cvv" class="form-control" placeholder="123">
-          </div>
-        </div>
-      </div>
       <button type="submit" class="btn-pay">
-        PLATI {{ transaction.amount | number:'1.2-2' }} {{ transaction.currency }}
+        NASTAVI KA PLAĆANJU ({{ transaction.amount | number:'1.2-2' }} {{ transaction.currency }})
       </button>
 
     </form>

@@ -1,0 +1,28 @@
+<div class="psp-container">
+    <h2>Izaberite način plaćanja</h2>
+    <p>Transakcija ID: <strong>{{ transactionId }}</strong></p>
+    
+    <div class="methods-grid">
+        <div class="method-card" (click)="chooseCard()">
+            <div class="icon">💳</div>
+            <h3>Platna Kartica</h3>
+            <p>Visa, MasterCard, Dina</p>
+        </div>
+
+        <div class="method-card disabled">
+            <div class="icon">📱</div>
+            <h3>IPS QR Kod</h3>
+            <p>Skeniraj i plati</p>
+        </div>
+
+        <div class="method-card disabled">
+            <div class="icon">🅿️</div>
+            <h3>PayPal</h3>
+        </div>
+
+        <div class="method-card disabled">
+            <div class="icon">₿</div>
+            <h3>Kriptovaluta</h3>
+        </div>
+    </div>
+</div>

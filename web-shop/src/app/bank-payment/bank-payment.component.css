@@ -1,0 +1,150 @@
+/* --- GLAVNI OKVIR (POVEĆAN) --- */
+.bank-container { 
+    max-width: 600px; /* <--- Povećano sa 480px na 600px */
+    margin: 50px auto; 
+    border: 1px solid #ccc; 
+    font-family: 'Helvetica Neue', Arial, sans-serif; 
+    background: #f9f9f9; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Jača senka za 3D efekat */
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* --- ZAGLAVLJE --- */
+.bank-header { 
+    background: #2c3e50; 
+    color: white; 
+    padding: 30px; 
+    text-align: center; 
+}
+
+.bank-header h2 {
+    font-size: 28px; /* Veći naslov */
+    margin: 0 0 10px 0;
+}
+
+/* --- INFO O IZNOSU --- */
+.payment-info { 
+    text-align: center; 
+    padding: 30px; 
+    background: #ecf0f1; 
+    border-bottom: 1px solid #ddd; 
+}
+
+.payment-info h3 {
+    margin: 10px 0 0;
+    color: #2c3e50;
+    font-size: 32px; /* Veći font za iznos */
+    font-weight: 800;
+}
+
+/* --- FORMA --- */
+form { padding: 40px; } /* Više prostora unutar forme */
+
+.form-group { margin-bottom: 25px; }
+
+/* --- NATPISI (LABELE) --- */
+label { 
+    display: block; 
+    margin-bottom: 10px; 
+    font-weight: bold; 
+    font-size: 16px; /* <--- POVEĆANO (Bilo je 13px) */
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* --- INPUT POLJA --- */
+input { 
+    width: 100%; 
+    padding: 15px; /* Deblja polja */
+    border: 2px solid #ddd; /* Malo deblja linija */
+    border-radius: 6px; 
+    box-sizing: border-box; 
+    font-size: 20px; /* Krupan tekst dok kucaš */
+    letter-spacing: 2px; /* Razmak između brojeva */
+    color: #333;
+    transition: border-color 0.3s;
+}
+
+input:focus {
+    border-color: #3498db;
+    outline: none;
+    background-color: #fff;
+}
+
+/* --- LOGIKA ZA SLIČICE --- */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pan-input {
+    padding-right: 110px; /* Još malo mesta za logoe */
+}
+
+.card-icons {
+    position: absolute;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.9);
+    padding-left: 5px;
+}
+
+.card-logo {
+    height: 32px; /* Veći logoi */
+    width: auto;
+    transition: all 0.3s ease;
+    opacity: 0.3;
+    filter: grayscale(100%);
+}
+
+.card-logo.active {
+    opacity: 1;
+    filter: grayscale(0%);
+    transform: scale(1.15);
+}
+
+.card-logo.faded { opacity: 0.1; }
+
+/* --- DUGMIĆI --- */
+.row { display: flex; gap: 20px; } /* Razmak između datum i CVV polja */
+
+.btn-pay { 
+    width: 100%; 
+    padding: 18px; /* Veće dugme */
+    background: #27ae60; 
+    color: white; 
+    border: none; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 20px; 
+    font-weight: bold; 
+    margin-top: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: transform 0.1s, background 0.2s;
+}
+
+.btn-pay:hover { 
+    background: #219150; 
+    transform: translateY(-2px);
+}
+
+.btn-pay:active { transform: translateY(0); }
+
+/* --- ALERTI --- */
+.alert { 
+    padding: 20px; 
+    text-align: center; 
+    color: white; 
+    margin-top: 20px; 
+    border-radius: 6px; 
+    font-size: 16px;
+    font-weight: bold;
+}
+.alert.success { background: #27ae60; }
+.alert.error { background: #c0392b; }

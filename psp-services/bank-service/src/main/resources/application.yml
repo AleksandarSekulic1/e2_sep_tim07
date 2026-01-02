@@ -1,0 +1,20 @@
+server:
+  port: 8085            # Banka radi na 8085 (da se ne sudara sa core-om na 8081)
+
+spring:
+  application:
+    name: bank-service
+  
+  datasource:
+    # Koristimo isti server (localhost:5444) ali NOVU bazu 'psp_bank_db'
+    url: jdbc:postgresql://localhost:5444/psp_bank_db
+    username: postgres
+    password: super
+  
+  jpa:
+    hibernate:
+      ddl-auto: update  # Kreiraće tabele automatski
+    show-sql: true      # Da vidimo upite
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

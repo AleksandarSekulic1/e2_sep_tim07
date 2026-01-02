@@ -1,67 +1,54 @@
 package com.psp.card.controller;
 
 import com.psp.card.dto.CardPaymentRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Random;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/cards")
 public class CardController {
 
+    @Autowired
+    private RestTemplate restTemplate;
+
+    // URL Banke (ovo ćemo napraviti u sledećem koraku, za sad neka stoji ovako)
+    // Ako nemaš Bank servis još, ovaj deo će pucati, ali to je OČEKIVANO dok ne dignemo banku.
+    private final String BANK_SERVICE_URL = "http://localhost:8085/api/bank/request-payment-url";
+
     @PostMapping("/pay")
-    public String processPayment(@RequestBody CardPaymentRequest request) {
-        System.out.println("---------------------------------------------");
-        System.out.println("CARD SERVICE - OBRADA PLAĆANJA:");
-        System.out.println("Vlasnik: " + request.getCardHolder());
-        System.out.println("PAN: " + request.getPan());
-
-        // 1. Validacija: Da li su podaci uopšte tu?
-        if (request.getPan() == null || request.getPan().trim().isEmpty()) {
-            System.out.println("❌ GREŠKA: Broj kartice je prazan.");
-            return "ERROR";
-        }
-
-        // 2. Validacija: Lunov Algoritam (OBAVEZNO PO SPECIFIKACIJI)
-        // Uklanjamo razmake pre provere (za svaki slučaj)
-        String cleanPan = request.getPan().replaceAll("\\s+", "");
-        if (!luhnCheck(cleanPan)) {
-            System.out.println("❌ GREŠKA: Neispravan broj kartice (Pao na Lunovom testu).");
-            System.out.println("---------------------------------------------");
-            return "ERROR";
-        }
-
-        // 3. Poslovna Logika: Provera stanja na računu
-        if (request.getAmount() > 20000) {
-            System.out.println("❌ ODBIJENO: Nedovoljno sredstava (Iznos > 20.000).");
-            System.out.println("---------------------------------------------");
-            return "FAILED";
-        }
-
-        // Ako je sve prošlo:
-        System.out.println("✅ ODOBRENO: Transakcija uspešna.");
-        System.out.println("---------------------------------------------");
-        return "SUCCESS";
-    }
-
-    // --- POMOĆNA FUNKCIJA: LUNOV ALGORITAM ---
-    private boolean luhnCheck(String cardNo) {
-        int nDigits = cardNo.length();
-        int nSum = 0;
-        boolean isSecond = false;
+    public ResponseEntity<?> initiateCardPayment(@RequestBody CardPaymentRequest request) {
         
-        // Idemo od desna na levo
-        for (int i = nDigits - 1; i >= 0; i--) {
-            int d = cardNo.charAt(i) - '0';
+        System.out.println("---------------------------------------------");
+        System.out.println("CARD SERVICE - INICIJALIZACIJA KA BANCI:");
+        System.out.println("Transakcija ID: " + request.getMerchantOrderId());
 
-            if (isSecond == true)
-                d = d * 2;
+        // Priprema podataka za Banku (Tabela 2 iz specifikacije)
+        Map<String, Object> bankRequest = new HashMap<>();
+        bankRequest.put("merchantId", "PSP_CLIENT_ID_123"); // ID koji nam je banka dala
+        bankRequest.put("amount", request.getAmount());
+        bankRequest.put("currency", request.getCurrency());
+        bankRequest.put("merchantOrderId", request.getMerchantOrderId()); // STAN
+        bankRequest.put("merchantTimestamp", LocalDateTime.now().toString());
 
-            // Ako je dvocifren (npr 18), saberi cifre (1+8=9)
-            nSum += d / 10;
-            nSum += d % 10;
+        try {
+            // Šaljemo zahtev Banci da nam da URL
+            ResponseEntity<Map> bankResponse = restTemplate.postForEntity(BANK_SERVICE_URL, bankRequest, Map.class);
+            
+            System.out.println("✅ Dobijen URL od Banke: " + bankResponse.getBody().get("paymentUrl"));
+            
+            // Vraćamo Frontendu URL Banke
+            return ResponseEntity.ok(bankResponse.getBody());
 
-            isSecond = !isSecond;
+        } catch (Exception e) {
+            System.out.println("❌ GREŠKA: Banka nije dostupna (Da li je pokrenut Bank Service?).");
+            // Privremeno vraćamo grešku dok ne napravimo Bank servis
+            return ResponseEntity.status(500).body("Greška u komunikaciji sa bankom");
         }
-        return (nSum % 10 == 0);
     }
 }
