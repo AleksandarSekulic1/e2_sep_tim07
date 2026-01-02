@@ -36,63 +36,79 @@ public class BankController {
     }
 
     @PostMapping("/pay")
-    public ResponseEntity<?> processPayment(@RequestBody Map<String, Object> paymentData) {
-        String pan = (String) paymentData.get("pan");
-        String expiryDate = (String) paymentData.get("expiryDate"); // Očekuje se format "MM/YY"
-        Double amount = Double.valueOf(paymentData.get("amount").toString());
-        String merchantOrderId = (String) paymentData.get("merchantOrderId");
+public ResponseEntity<?> processPayment(@RequestBody Map<String, Object> paymentData) {
+    String pan = (String) paymentData.get("pan");
+    String expiryDate = (String) paymentData.get("expiryDate");
+    String cvv = (String) paymentData.get("cvv");
+    Double amount = Double.valueOf(paymentData.get("amount").toString());
+    String merchantOrderId = (String) paymentData.get("merchantOrderId");
 
-        String globalId = UUID.randomUUID().toString();
+    String globalId = UUID.randomUUID().toString();
+    System.out.println("🏦 BANKA: Obrada za ID: " + merchantOrderId);
 
-        System.out.println("🏦 BANKA: Obrada za ID: " + merchantOrderId + " | Iznos: " + amount);
-
-        // 1. Validacija formata datuma (MM/YY) - Specifikacija 4.a
-        if (expiryDate == null || !expiryDate.matches("(0[1-9]|1[0-2])/[0-9]{2}")) {
-            System.out.println("❌ BANKA: Neispravan format datuma: " + expiryDate);
-            return ResponseEntity.badRequest().body("Neispravan format datuma (MM/YY)");
-        }
-
-        // 2. Provera da li je kartica istekla - Specifikacija 4.a
-        if (isCardExpired(expiryDate)) {
-            System.out.println("❌ BANKA: Kartica je istekla: " + expiryDate);
-            return ResponseEntity.badRequest().body("Kartica je istekla");
-        }
-
-        // 3. Validacija PAN-a Lunovom formulom - Specifikacija 4.a
-        if (!luhnCheck(pan)) {
-            System.out.println("❌ BANKA: Neuspešan Lunov test za PAN");
-            return ResponseEntity.badRequest().body("Neispravan broj kartice");
-        }
-
-        // 4. Provera raspoloživih sredstava - Specifikacija 5
-        if (amount > 20000) {
-            System.out.println("❌ BANKA: Nedovoljno sredstava za iznos: " + amount);
-            return ResponseEntity.badRequest().body("Nedovoljno sredstava");
-        }
-
-        System.out.println("✅ BANKA: Transakcija uspešna! Obaveštavam Core servis...");
-
-        try {
-            String coreUrl = "http://localhost:8081/transactions/update-status/" + merchantOrderId;
-            
-            Map<String, Object> statusUpdate = new HashMap<>();
-            statusUpdate.put("status", "PAID");
-            statusUpdate.put("globalTransactionId", globalId);
-            statusUpdate.put("acquirerTimestamp", LocalDateTime.now().toString());
-            statusUpdate.put("merchantOrderId", merchantOrderId); 
-
-            restTemplate.put(coreUrl, statusUpdate);
-            System.out.println("📞 BANKA -> CORE: Poslato: Status=PAID, GlobalID=" + globalId);
-
-        } catch (Exception e) {
-            System.err.println("⚠️ Greška pri javljanju Core servisu: " + e.getMessage());
-        }
-
-        Map<String, String> successResponse = new HashMap<>();
-        successResponse.put("status", "SUCCESS");
-        successResponse.put("message", "Transakcija odobrena");
-        return ResponseEntity.ok(successResponse);
+    // 1. Validacija CVV
+    if (cvv == null || !cvv.matches("^[0-9]{3}$")) {
+        reportFailure(merchantOrderId, "INVALID_CVV");
+        return ResponseEntity.badRequest().body("Neispravan CVV");
     }
+
+    // 2. Validacija formata datuma
+    if (expiryDate == null || !expiryDate.matches("(0[1-9]|1[0-2])/[0-9]{2}")) {
+        reportFailure(merchantOrderId, "INVALID_DATE_FORMAT");
+        return ResponseEntity.badRequest().body("Neispravan format datuma (MM/YY)");
+    }
+
+    // 3. Provera da li je kartica istekla
+    if (isCardExpired(expiryDate)) {
+        reportFailure(merchantOrderId, "CARD_EXPIRED");
+        return ResponseEntity.badRequest().body("Kartica je istekla");
+    }
+
+    // 4. Validacija PAN-a
+    if (!luhnCheck(pan)) {
+        reportFailure(merchantOrderId, "LUHN_FAILED");
+        return ResponseEntity.badRequest().body("Neispravan broj kartice");
+    }
+
+    // 5. Provera sredstava
+    if (amount > 20000) {
+        reportFailure(merchantOrderId, "INSUFFICIENT_FUNDS");
+        return ResponseEntity.badRequest().body("Nedovoljno sredstava na računu");
+    }
+
+    // AKO SVE PROĐE - JAVLJAMO USPEH (PAID)
+    try {
+        String coreUrl = "http://localhost:8081/transactions/update-status/" + merchantOrderId;
+        Map<String, Object> statusUpdate = new HashMap<>();
+        statusUpdate.put("status", "PAID");
+        statusUpdate.put("globalTransactionId", globalId);
+        statusUpdate.put("acquirerTimestamp", LocalDateTime.now().toString());
+
+        restTemplate.put(coreUrl, statusUpdate);
+        System.out.println("📞 BANKA -> CORE: Webhook SUCCESS poslat.");
+    } catch (Exception e) {
+        System.err.println("⚠️ Greška pri javljanju: " + e.getMessage());
+    }
+
+    Map<String, String> successResponse = new HashMap<>();
+    successResponse.put("status", "SUCCESS");
+    return ResponseEntity.ok(successResponse);
+}
+
+// POMOĆNA METODA ZA JAVLJANJE NEUSPEHA
+private void reportFailure(String merchantOrderId, String reason) {
+    try {
+        String coreUrl = "http://localhost:8081/transactions/update-status/" + merchantOrderId;
+        Map<String, Object> statusUpdate = new HashMap<>();
+        statusUpdate.put("status", "FAILED");
+        statusUpdate.put("reason", reason);
+        
+        restTemplate.put(coreUrl, statusUpdate);
+        System.out.println("📞 BANKA -> CORE: Webhook FAILED poslat (" + reason + ")");
+    } catch (Exception e) {
+        System.err.println("⚠️ Greška pri javljanju neuspeha: " + e.getMessage());
+    }
+}
 
     private boolean luhnCheck(String cardNo) {
         if (cardNo == null) return false;
