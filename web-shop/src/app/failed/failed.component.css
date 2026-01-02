@@ -1,0 +1,19 @@
+/* Kopiraj sve iz success.css, samo promeni boje */
+.result-container {
+    text-align: center;
+    margin-top: 100px;
+    font-family: sans-serif;
+}
+.icon { font-size: 80px; margin-bottom: 20px; }
+h1 { color: #c0392b; margin-bottom: 10px; } /* Crvena */
+p { color: #555; font-size: 18px; margin-bottom: 30px; }
+.btn-home {
+    display: inline-block;
+    padding: 15px 30px;
+    background: #c0392b; /* Crvena pozadina */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.btn-home:hover { background: #a93226; }

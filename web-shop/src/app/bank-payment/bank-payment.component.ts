@@ -15,6 +15,8 @@ export class BankPaymentComponent implements OnInit {
 
   paymentId: string = '';
   cardType: string = '';
+  successUrl: string = '';
+  failedUrl: string = '';
   // Podaci koje korisnik unosi (PAN, CVV...)
   cardData = {
     pan: '',
@@ -32,30 +34,40 @@ export class BankPaymentComponent implements OnInit {
   ngOnInit() {
     this.paymentId = this.route.snapshot.paramMap.get('paymentId') || '';
 
-    // --- IZMENA: Čitamo iznos koji nam je Backend poslao kroz link ---
+    // Hvatamo iznos
     const amountParam = this.route.snapshot.queryParamMap.get('amount');
-    
-    if (amountParam) {
-      this.cardData.amount = Number(amountParam); // Upisujemo pravi iznos (2000)
-    }
-    
-    console.log("Banka učitala iznos:", this.cardData.amount);
+    if (amountParam) this.cardData.amount = Number(amountParam);
+
+    // --- IZMENA: Hvatamo URL-ove ---
+    this.successUrl = this.route.snapshot.queryParamMap.get('successUrl') || '';
+    this.failedUrl = this.route.snapshot.queryParamMap.get('failedUrl') || '';
   }
 
   submitPayment() {
     console.log("Šaljem podatke Banci...", this.cardData);
 
-    // Šaljemo direktno na Bank Service (preko Gateway-a na /bank/...)
     this.http.post('http://localhost:8080/bank/api/bank/pay', this.cardData)
       .subscribe({
         next: (res) => {
           this.isSuccess = true;
-          this.message = "✅ PLAĆANJE USPEŠNO IZVRŠENO!";
-          // Ovde bi posle par sekundi trebalo vratiti korisnika na Web Shop
+          this.message = "✅ PLAĆANJE USPEŠNO IZVRŠENO! Preusmeravanje...";
+          
+          // --- IZMENA: Tajmer od 3 sekunde pa redirekcija ---
+          setTimeout(() => {
+             if (this.successUrl) {
+               console.log("Vraćam na Web Shop:", this.successUrl);
+               // Moramo dekodirati URL pre upotrebe (jer smo ga enkodirali na početku)
+               window.location.href = decodeURIComponent(this.successUrl);
+             } else {
+               alert("Nemam gde da te vratim! (successUrl fali)");
+             }
+          }, 3000); // 3000ms = 3 sekunde
         },
         error: (err) => {
           this.isSuccess = false;
-          this.message = "❌ PLAĆANJE ODBIJENO: " + (err.error || "Nepoznata greška");
+          this.message = "❌ PLAĆANJE ODBIJENO: " + (err.error || "Greška");
+          
+          // Opciono: Možeš i ovde staviti tajmer za failedUrl ako želiš
         }
       });
   }

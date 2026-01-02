@@ -52,8 +52,12 @@ export class PaymentComponent {
         this.isError = false;
         
         if (response.paymentUrl) {
-           // --- IZMENA OVDE: Dodajemo iznos na kraj linka ---
-           const finalUrl = `${response.paymentUrl}?amount=${this.transaction.amount}`;
+           // --- IZMENA: Šaljemo i successUrl i failedUrl kroz link ---
+           // Koristimo encodeURIComponent da specijalni znaci (://) ne pokvare link
+           const sUrl = encodeURIComponent(this.transaction.successUrl);
+           const fUrl = encodeURIComponent(this.transaction.failedUrl);
+
+           const finalUrl = `${response.paymentUrl}?amount=${this.transaction.amount}&successUrl=${sUrl}&failedUrl=${fUrl}`;
            
            console.log("Preusmeravam na:", finalUrl);
            window.location.href = finalUrl;
