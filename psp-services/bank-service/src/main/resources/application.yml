@@ -7,7 +7,7 @@ spring:
   
   datasource:
     # Koristimo isti server (localhost:5444) ali NOVU bazu 'psp_bank_db'
-    url: jdbc:postgresql://localhost:5444/psp_bank_db
+    url: jdbc:postgresql://localhost:5445/psp_bank_db
     username: postgres
     password: super
   

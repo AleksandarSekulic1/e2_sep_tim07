@@ -17,38 +17,58 @@ public class CardController {
     @Autowired
     private RestTemplate restTemplate;
 
-    // URL Banke (ovo ćemo napraviti u sledećem koraku, za sad neka stoji ovako)
-    // Ako nemaš Bank servis još, ovaj deo će pucati, ali to je OČEKIVANO dok ne dignemo banku.
     private final String BANK_SERVICE_URL = "http://localhost:8085/api/bank/request-payment-url";
+    
+    // Putanja do Core servisa (8081). 
+    // VAŽNO: Proveri da li tvoj TransactionController ima @PutMapping("/update-method/{id}")
+    private final String CORE_SERVICE_UPDATE_URL = "http://localhost:8081/transactions/update-method/";
 
     @PostMapping("/pay")
     public ResponseEntity<?> initiateCardPayment(@RequestBody CardPaymentRequest request) {
         
+        if (request.getPspTransactionId() == null) {
+        System.out.println("❌ GREŠKA: Stigao je NULL pspTransactionId sa frontenda!");
+        return ResponseEntity.badRequest().body("Greška: pspTransactionId ne sme biti null");
+    }
+    
         System.out.println("---------------------------------------------");
-        System.out.println("CARD SERVICE - INICIJALIZACIJA KA BANCI:");
-        System.out.println("Transakcija ID: " + request.getMerchantOrderId());
+        System.out.println("CARD SERVICE - START");
+        System.out.println("Ažuriranje metode za PSP ID: " + request.getPspTransactionId());
 
-        // Priprema podataka za Banku (Tabela 2 iz specifikacije)
+        // KORAK 1: ODMAH šaljemo signal Core servisu da upiše "CARD" u bazu.
+        // Ovo radimo pre poziva banke da bi se na frontendu odmah pojavio bedž.
+        try {
+            Map<String, String> updateRequest = new HashMap<>();
+            updateRequest.put("method", "CARD");
+            
+            // Koristimo put() da bismo pogodili @PutMapping u Core servisu
+            restTemplate.put(CORE_SERVICE_UPDATE_URL + request.getPspTransactionId(), updateRequest);
+            
+            System.out.println("✅ CORE USPEŠNO OBAVEŠTEN: Metoda CARD je upisana.");
+        } catch (Exception e) {
+            // Logujemo grešku ali ne prekidamo proces (možda je samo Core servis spor)
+            System.out.println("⚠️ GREŠKA PRI UPISU METODE: " + e.getMessage());
+        }
+
+        // KORAK 2: Priprema i slanje zahteva Banci (Acquirer-u)
         Map<String, Object> bankRequest = new HashMap<>();
-        bankRequest.put("merchantId", "PSP_CLIENT_ID_123"); // ID koji nam je banka dala
+        bankRequest.put("merchantId", "PSP_CLIENT_ID_123");
         bankRequest.put("amount", request.getAmount());
         bankRequest.put("currency", request.getCurrency());
-        bankRequest.put("merchantOrderId", request.getMerchantOrderId()); // STAN
+        bankRequest.put("merchantOrderId", request.getMerchantOrderId());
         bankRequest.put("merchantTimestamp", LocalDateTime.now().toString());
 
         try {
-            // Šaljemo zahtev Banci da nam da URL
+            System.out.println("🚀 Šaljem zahtev Banci na: " + BANK_SERVICE_URL);
             ResponseEntity<Map> bankResponse = restTemplate.postForEntity(BANK_SERVICE_URL, bankRequest, Map.class);
             
-            System.out.println("✅ Dobijen URL od Banke: " + bankResponse.getBody().get("paymentUrl"));
-            
-            // Vraćamo Frontendu URL Banke
+            System.out.println("✅ BANKA ODGOVORILA: URL dobijen.");
+            // Vraćamo paymentUrl frontendu koji će uraditi redirekciju
             return ResponseEntity.ok(bankResponse.getBody());
 
         } catch (Exception e) {
-            System.out.println("❌ GREŠKA: Banka nije dostupna (Da li je pokrenut Bank Service?).");
-            // Privremeno vraćamo grešku dok ne napravimo Bank servis
-            return ResponseEntity.status(500).body("Greška u komunikaciji sa bankom");
+            System.out.println("❌ BANKA NEDOSTUPNA: Proveri Bank Service (8085)");
+            return ResponseEntity.status(500).body("Greška u komunikaciji sa bankom: " + e.getMessage());
         }
     }
 }
