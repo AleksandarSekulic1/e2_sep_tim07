@@ -1,0 +1,86 @@
+.qr-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h2 {
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+p {
+    color: #4a5568;
+    font-size: 18px;
+    margin-bottom: 25px;
+}
+
+/* Okvir za QR kod koji simulira ekran terminala */
+.qr-frame {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 25px;
+    transition: transform 0.3s ease;
+}
+
+.qr-frame:hover {
+    transform: scale(1.02);
+    border-color: #4299e1;
+}
+
+.qr-frame img {
+    display: block;
+    width: 250px;
+    height: 250px;
+    image-rendering: pixelated; /* Osigurava oštrinu QR koda */
+}
+
+/* Instrukcije za korisnika */
+.instructions {
+    text-align: left;
+    background: #edf2f7;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 5px solid #4299e1;
+}
+
+.instructions p {
+    margin: 10px 0;
+    font-size: 15px;
+    color: #2d3748;
+    line-height: 1.4;
+}
+
+.instructions strong {
+    color: #2b6cb0;
+}
+
+/* Loader animacija dok se čeka kod */
+.loader {
+    font-weight: bold;
+    color: #4a5568;
+    padding: 40px;
+    font-style: italic;
+}
+
+/* Responzivnost za mobilne telefone */
+@media (max-width: 600px) {
+    .qr-container {
+        margin: 20px;
+        padding: 20px;
+    }
+    
+    .qr-frame img {
+        width: 200px;
+        height: 200px;
+    }
+}

@@ -62,4 +62,11 @@ export class PaymentMethodsComponent implements OnInit {
       }
     });
   }
+
+  chooseQR() {
+  console.log("Biramo plaćanje QR kodom...");
+  // Preusmeravamo na novu komponentu koju ćemo sad napraviti
+  window.location.href = `http://localhost:4200/qr-payment/${this.transactionId}?amount=${this.amount}`;
+}
+
 }
