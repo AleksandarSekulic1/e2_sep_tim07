@@ -1,4 +1,4 @@
-# 💳 PSP - Payment Service Provider (Modul: Plaćanje Karticom)
+# 💳 PSP - Payment Service Provider 
 
 Ovaj projekat predstavlja implementaciju sistema pružaoca usluga plaćanja (PSP) koji omogućava sigurnu transakciju između WebShop-a (Rent-A-Car agencije) i bankarskog servisa (Acquirer).
 
@@ -68,3 +68,28 @@ Sistem je zasnovan na **mikroservisnoj arhitekturi** i omogućava kompletan tok 
 ---
 
 **Napomena:** Za potrebe testiranja, svi računi kupaca i prodavaca se posmatraju unutar iste (Acquirer) banke, u skladu sa napomenom u specifikaciji.
+
+---
+
+## 🧪 Scenario za Testiranje (Demo)
+
+Za potrebe odbrane rada, preporučuje se korišćenje sledećih scenarija kako bi se demonstrirale sve implementirane validacije:
+
+### 1. Uspešno Plaćanje (Status: PAID)
+* **Kartica:** `4556 1234 5678 9012` (Visa)
+* **Datum:** `12/26` (Bilo koji budući datum)
+* **CVV:** `123`
+* **Iznos:** `< 20.000 RSD`
+* **Očekivani ishod:** Status se menja u **PAID**, generiše se Global ID i vrši se redirekcija na Success URL.
+
+### 2. Neuspešno Plaćanje - Pogrešan CVV (Status: FAILED)
+* **CVV:** `12` (Manje od 3 cifre) ili bilo koji neispravan broj.
+* **Očekivani ishod:** Poruka "Neispravan CVV", status **FAILED** u bazi uz razlog `INVALID_CVV`.
+
+### 3. Neuspešno Plaćanje - Istekla Kartica (Status: FAILED)
+* **Datum:** `01/22` (Prošlost)
+* **Očekivani ishod:** Poruka "Kartica je istekla", status **FAILED** uz razlog `CARD_EXPIRED`.
+
+### 4. Neuspešno Plaćanje - Limit Sredstava (Status: FAILED)
+* **Iznos:** Uneti preko `20.000 RSD` pri inicijalizaciji.
+* **Očekivani ishod:** Status **FAILED** uz razlog `INSUFFICIENT_FUNDS`.
