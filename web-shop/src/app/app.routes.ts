@@ -5,6 +5,7 @@ import { PaymentMethodsComponent } from './payment-methods/payment-methods.compo
 import { BankPaymentComponent } from './bank-payment/bank-payment.component'; // <--- IMPORT
 import { SuccessComponent } from './success/success.component';
 import { FailedComponent } from './failed/failed.component';
+import { QRPaymentComponent } from './qr-payment/qr-payment.component'; // <--- IMPORTUJ OVO
 
 export const routes: Routes = [
   { path: '', redirectTo: 'payment', pathMatch: 'full' }, // Početna strana vodi na plaćanje
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'bank-payment/:paymentId', component: BankPaymentComponent },
   { path: 'transactions', component: TransactionListComponent },
   { path: 'success', component: SuccessComponent },
-  { path: 'failed', component: FailedComponent }
+  { path: 'failed', component: FailedComponent },
+  { path: 'qr-payment/:id', component: QRPaymentComponent }
 ];

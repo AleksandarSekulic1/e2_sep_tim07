@@ -21,6 +21,7 @@ import java.util.Random;
 
 @RestController
 @RequestMapping("/transactions")
+//@CrossOrigin(origins = "http://localhost:4200") // <--- OBAVEZNO DODAJ OVO
 public class TransactionController {
 
     @Autowired
@@ -79,9 +80,12 @@ public class TransactionController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<?> getTransactionDetails(@PathVariable Long id) {
-        return ResponseEntity.ok(transactionRepository.findById(id));
-    }
+    //@CrossOrigin(origins = "http://localhost:4200") // Dodaj samo ovde ako Angular gađa port 8081 direktno
+public ResponseEntity<Transaction> getTransactionDetails(@PathVariable Long id) {
+    return transactionRepository.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+}
 
     private String generateStan() {
         Random random = new Random();

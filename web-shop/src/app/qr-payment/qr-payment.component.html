@@ -1,0 +1,26 @@
+<div class="qr-container">
+  <h2>📱 IPS Skeniraj i plati</h2>
+  <p>Iznos za uplatu: <strong>{{ amount | number:'1.2-2' }} RSD</strong></p>
+  
+  <div class="qr-frame" *ngIf="qrCodeBase64">
+    <img [src]="'data:image/png;base64,' + qrCodeBase64" alt="IPS QR Kod">
+    <div class="ips-string-box">
+      <small>NBS IPS Standard:</small>
+      <code>{{ ipsString }}</code>
+    </div>
+  </div>
+
+  <div class="loader" *ngIf="!qrCodeBase64">Generisanje koda...</div>
+
+  <div class="instructions">
+    <p>1. Otvorite aplikaciju mobilnog bankarstva</p>
+    <p>2. Izaberite opciju <strong>"IPS Skeniraj"</strong></p>
+    <p>3. Skenirajte kod iznad i potvrdite uplatu</p>
+  </div>
+
+  <div class="simulation-area">
+    <button (click)="simulateQRAppPayment()" class="btn-simulate">
+        🚀 Simuliraj mBanking potvrdu
+    </button>
+  </div>
+</div>
