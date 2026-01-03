@@ -15,6 +15,7 @@ export class QRPaymentComponent implements OnInit, OnDestroy {
   qrCodeBase64: string = '';
   amount: number = 0;
   pollingInterval: any;
+  ipsString: string = '';
 
   // Koristimo port 8080 jer tvoj API Gateway upravlja CORS-om i rutiranjem
   private baseUrl = 'http://localhost:8080/core';
@@ -27,16 +28,12 @@ export class QRPaymentComponent implements OnInit, OnDestroy {
     
     // Zahtev ide na Gateway: 8080/core/api/qr/generate/...
     this.http.get(`${this.baseUrl}/api/qr/generate/${this.transactionId}`).subscribe({
-      next: (res: any) => {
-        console.log("✅ QR Kod uspešno primljen preko Gateway-a!");
-        this.qrCodeBase64 = res.qrCode; 
-        this.startPolling(); // Pokrećemo proveru statusa [cite: 107]
-      },
-      error: (err) => {
-        console.error("❌ Greška pri generisanju koda:", err);
-        alert("Greška pri komunikaciji sa Gateway-om (8080).");
-      }
-    });
+  next: (res: any) => {
+    this.qrCodeBase64 = res.qrCode;
+    this.ipsString = res.ipsString; // Prihvatamo string koji smo poslali iz Jave
+    this.startPolling();
+  }
+});
   }
 
   startPolling() {

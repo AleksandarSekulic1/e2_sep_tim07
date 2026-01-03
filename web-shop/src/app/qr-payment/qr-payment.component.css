@@ -84,3 +84,55 @@ p {
         height: 200px;
     }
 }
+
+/* Stil za prikaz IPS stringa ispod QR koda */
+.ips-string-box {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    border: 1px dashed #cbd5e1;
+}
+
+.ips-string-box small {
+    display: block;
+    color: #64748b;
+    font-size: 10px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.ips-string-box code {
+    font-size: 11px;
+    color: #475569;
+    word-break: break-all; /* Da se string prelomi ako je dugačak */
+}
+
+/* Stil za Simulator dugme */
+.simulation-area {
+    margin-top: 30px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 20px;
+}
+
+.btn-simulate {
+    background: #48bb78; /* Zelena boja za uspeh */
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(72, 187, 120, 0.2);
+}
+
+.btn-simulate:hover {
+    background: #38a169;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(72, 187, 120, 0.3);
+}
+
+.btn-simulate:active {
+    transform: translateY(0);
+}

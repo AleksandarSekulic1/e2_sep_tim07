@@ -62,10 +62,20 @@ public ResponseEntity<?> generateQRCode(@PathVariable Long pspTransactionId) {
 @PostMapping("/simulate-pay/{pspTransactionId}")
 public ResponseEntity<?> simulatePayment(@PathVariable Long pspTransactionId) {
     return transactionRepository.findById(pspTransactionId).map(transaction -> {
+        // Postavljamo status na PAID
         transaction.setStatus("PAID");
+        
+        // Generišemo fiktivni Global ID koji simulira odgovor banke (Tačka 5 specifikacije)
+        String mockGlobalId = "QR-BANK-" + System.currentTimeMillis();
+        transaction.setGlobalTransactionId(mockGlobalId);
+        
+        // Postavljamo vreme kada je "banka" obradila transakciju
+        transaction.setAcquirerTimestamp(java.time.LocalDateTime.now());
+        
         transactionRepository.save(transaction);
-        System.out.println("📱 QR SIMULACIJA: Transakcija " + pspTransactionId + " je PLAĆENA.");
-        return ResponseEntity.ok("Upešno simulirano plaćanje");
+        
+        System.out.println("📱 QR SIMULACIJA: Transakcija " + pspTransactionId + " dopunjena sa Global ID: " + mockGlobalId);
+        return ResponseEntity.ok("Upešno simulirano plaćanje sa ID-em: " + mockGlobalId);
     }).orElse(ResponseEntity.notFound().build());
 }
 }
