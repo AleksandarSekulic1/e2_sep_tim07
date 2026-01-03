@@ -35,13 +35,20 @@
         </td>
         <td>{{ t.currency }}</td>
         <td>
-          <span class="badge" [ngClass]="{
-            'card-badge': t.paymentMethod === 'CARD', 
-            'paypal-badge': t.paymentMethod === 'PAYPAL',
-            'qr-badge': t.paymentMethod === 'QR'
-          }">
-            {{ t.paymentMethod }}
-          </span>
+          <ng-container *ngIf="t.paymentMethod; else noMethod">
+            <span class="badge" [ngClass]="{
+              'card-badge': t.paymentMethod === 'CARD', 
+              'paypal-badge': t.paymentMethod === 'PAYPAL',
+              'qr-badge': t.paymentMethod === 'QR'
+            }">
+              {{ t.paymentMethod }}
+            </span>
+          </ng-container>
+          <ng-template #noMethod>
+            <span style="color: #a0aec0; font-style: italic; font-size: 0.85em;">
+              🕒 Na čekanju...
+            </span>
+          </ng-template>
         </td>
         <td>
           <span class="status-badge" [ngClass]="t.status.toLowerCase()">

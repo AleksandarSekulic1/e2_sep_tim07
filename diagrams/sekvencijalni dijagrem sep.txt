@@ -1,0 +1,174 @@
+Sajt PlantUML Online Server: http://www.plantuml.com/plantuml/uml
+
+@startuml Plaćanje QR Kodom - Sekvencijalni Dijagram
+
+title Tok plaćanja QR kodom (KT 1)
+
+actor Kupac
+participant "Web Shop \n(Frontend)" as WF
+participant "Web Shop \nBackend" as WB
+participant "PSP API \nGateway" as GW
+participant "PSP Core \nService" as PC
+participant "Card/QR \nService" as CS
+database "PSP Baza \n(PostgreSQL)" as DB
+participant "Banka Servis \n(Acquirer)" as BS
+participant "mBanking \nAplikacija" as MB
+
+== 1. Inicijalizacija i Zahtev za Plaćanje ==
+
+Kupac -> WF: Odabir usluga i opcije "Plaćanje QR kodom"
+WF -> WB: Zahtev za kupovinu
+activate WB
+WB -> GW: 1. Inicijalizacija transakcije \n(MERCHANT_ID, AMOUNT, CURRENCY, SUCCESS_URL, itd.)
+activate GW
+note left
+Autentikacija Web Shop-a
+end note
+GW -> PC: Prosledi zahtev
+activate PC
+PC -> CS: Usmeri na Card/QR Service (Plug-in)
+activate CS
+CS -> DB: Provera pretplate i dostupnosti metode
+activate DB
+DB --> CS: Potvrda
+deactivate DB
+
+== 2. Generisanje i Prikaz QR Koda ==
+
+CS -> BS: 2. Zahtev za dobijanje \nPAYMENT_URL i PAYMENT_ID \n(AMOUNT, STAN, PSP_TIMESTAMP, itd.)
+activate BS
+BS -> CS: 3. Vraća PAYMENT_URL i PAYMENT_ID
+deactivate BS
+CS -> CS: Generisanje IPS QR Kod \n(po uzoru na IPS NBS)
+CS -> PC: Vraća PAYMENT_ID i PAYMENT_URL
+deactivate CS
+PC -> WF: Preusmeravanje Kupca na \nPAYMENT_URL Banke \n(koji sada prikazuje QR kod)
+deactivate PC
+Kupac <- WF: Prikazan QR kod za skeniranje
+deactivate WB
+deactivate GW
+note right
+QR Kod sadrži: valutu, iznos,
+broj računa primaoca.
+end note
+
+== 3. Plaćanje putem mBanking Aplikacije ==
+
+Kupac -> MB: 4. Pokretanje "IPS Skeniraj & Plati"
+activate MB
+MB -> Kupac: Skeniranje QR Koda
+MB -> BS: Autorizacija i izvršenje uplate
+activate BS
+BS -> BS: 5. Provera sredstava i rezervacija
+BS --> BS: Generiše GLOBAL_TRANSACTION_ID i ACQUIRER_TIMESTAMP.
+
+== 4. Obaveštenje o Statusu Transakcije i Završetak ==
+
+BS -> CS: 6. Prosledjivanje statusa transakcije (STAN, GLOBAL_TRANSACTION_ID, ACQUIRER_TIMESTAMP)
+activate CS
+deactivate BS
+CS -> PC: Ažuriraj status
+activate PC
+CS -> DB: Ažurira se status transakcije u PSP Bazi
+activate DB
+DB --> CS: Potvrda upisa
+deactivate DB
+deactivate CS
+PC -> WB: 7. Obaveštava Web Shop o statusu \n(koristeći SUCCESS_URL, FAILED_URL ili ERROR_URL)
+activate WB
+deactivate PC
+WB -> WF: Prikazuje poruku Kupcu
+Kupac <- WF: Prikaz statusa transakcije i pristup uslugama (u slučaju uspeha).
+deactivate WB
+deactivate MB
+
+@enduml
+
+--------------------------------------------------------------------------------------------------------------------
+@startuml Plaćanje Karticom - Sekvencijalni Dijagram
+
+title Tok Plaćanja Platnom Karticom (KT 1)
+
+actor Kupac
+participant "Web Shop \n(Frontend)" as WF
+participant "Web Shop \nBackend" as WB
+participant "PSP API \nGateway" as GW
+participant "PSP Core \nService" as PC
+participant "Card/QR \nService" as CS
+database "PSP Baza \n(PostgreSQL)" as DB
+participant "Banka Servis \n(Acquirer)" as BS
+
+== 1. Inicijalizacija i Zahtev za Plaćanje ==
+
+Kupac -> WF: Odabir usluga i opcije "Plaćanje karticom"
+WF -> WB: Zahtev za kupovinu
+activate WB
+WB -> GW: 1. Inicijalizacija transakcije \n(MERCHANT_ID, AMOUNT, CURRENCY, SUCCESS_URL, itd.) 
+activate GW
+note left
+Autentikacija Web Shop-a
+koristeći MERCHANT_ID
+i MERCHANT_PASSWORD.
+end note
+GW -> PC: Prosledi zahtev
+activate PC
+PC -> CS: Usmeri na Card/QR Service (Plug-in)
+activate CS
+CS -> DB: Provera pretplate Web Shop-a na plaćanje karticom
+activate DB
+DB --> CS: Potvrda
+deactivate DB
+
+== 2. Dobijanje URL-a za Plaćanje od Banke ==
+
+CS -> BS: 2. Zahtev za dobijanje \nPAYMENT_URL i PAYMENT_ID \n(AMOUNT, STAN, PSP_TIMESTAMP, itd.)
+activate BS
+BS -> CS: 3. Vraća PAYMENT_URL i PAYMENT_ID
+deactivate BS
+note right
+Banka validira zahtev i MERCHANT_ID. 
+end note
+CS -> PC: Vraća PAYMENT_ID i PAYMENT_URL
+deactivate CS
+PC -> DB: Čuva PSP_TIMESTAMP, STAN i PAYMENT_ID
+activate DB
+DB --> PC: Potvrda upisa
+deactivate DB
+PC -> WF: Preusmeravanje Kupca na \nPAYMENT_URL Banke
+deactivate PC
+deactivate WB
+deactivate GW
+
+== 3. Unos Podataka o Kartici i Plaćanje ==
+
+Kupac <- WF: Preusmeravanje
+Kupac -> BS: 4. Unos podataka o kartici \n(PAN, SECURITY_CODE, Ime, Datum) 
+activate BS
+note over BS
+- Validacija Lunovom formulom.
+- Forma je vremenski ograničena i samo jedan pokušaj plaćanja. 
+- Iznos se ne može menjati. 
+end note
+BS -> BS: 5. Provera sredstava na računu Kupca i rezervacija sredstava.
+BS --> BS: Generiše GLOBAL_TRANSACTION_ID i ACQUIRER_TIMESTAMP.
+
+== 4. Obaveštenje o Statusu Transakcije i Završetak ==
+
+BS -> CS: 6. Prosledjivanje statusa transakcije (STAN, GLOBAL_TRANSACTION_ID, ACQUIRER_TIMESTAMP) 
+deactivate BS
+activate CS
+CS -> PC: Ažuriraj status
+activate PC
+CS -> DB: Ažurira se status transakcije u PSP Bazi
+activate DB
+DB --> CS: Potvrda
+deactivate DB
+deactivate CS
+PC -> WB: 7. Obaveštava Web Shop o statusu \n(koristeći SUCCESS_URL, FAILED_URL ili ERROR_URL)
+activate WB
+deactivate PC
+WB -> WF: Prikazuje poruku Kupcu
+Kupac <- WF: Prikaz statusa transakcije i pristup uslugama (u slućaju uspeha). 
+deactivate WB
+
+@enduml

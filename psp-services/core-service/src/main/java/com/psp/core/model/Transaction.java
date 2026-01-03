@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "transactions")
@@ -25,6 +26,7 @@ public class Transaction {
     private LocalDateTime merchantTimestamp; // Vreme kreiranja na Web Shopu
     
     // Naša interna polja
+    @JsonProperty("paymentMethod") // Eksplicitno mapiranje za Jackson
     private String paymentMethod;    // CARD, QR, PAYPAL, CRYPTO 
     private String status;           // INITIATED, SUCCESS, FAILED, ERROR
     
@@ -52,4 +54,11 @@ public class Transaction {
     private String successUrl;
     private String failedUrl;
     private String errorUrl;
+
+    // Dodaj ovo polje u klasu Transaction
+private String reason;
+
+// I odgovarajući getter/setter ako nemaš @Data ili @Setter
+public String getReason() { return reason; }
+public void setReason(String reason) { this.reason = reason; }
 }

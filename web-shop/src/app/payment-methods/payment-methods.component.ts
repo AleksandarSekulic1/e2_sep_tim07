@@ -40,24 +40,33 @@ export class PaymentMethodsComponent implements OnInit {
     console.log("Biramo plaćanje karticom...");
     
     const request = {
-      merchantOrderId: this.transactionId,
+      // 1. pspTransactionId šaljemo Card servisu da bi on znao koju 
+      //    transakciju u bazi da ažurira na metodu "CARD"
+      pspTransactionId: this.transactionId, 
+      
+      // 2. merchantOrderId šaljemo Banki. UKLONJEN JE PREFIKS "ORDER-"
+      //    tako da Banka vraća čist ID (npr. "105") Core servisu.
+      //    Bez ovoga Core servis ne može da nađe transakciju i status ostaje CREATED.
+      merchantOrderId: this.transactionId, 
+      
       amount: this.amount,
       currency: "RSD",
       merchantTimestamp: new Date().toISOString()
     };
 
+    console.log("🚀 Šaljem ispravljen zahtev Card servisu:", request);
+
     this.paymentService.payWithCard(request).subscribe({
       next: (response: any) => {
         if (response.paymentUrl) {
-          // --- IZMENA: Na link Banke "lepimo" naše success/failed linkove ---
-          // Ovo radimo OVDE da ne bismo morali da menjamo Java kod
+          // Na link Banke lepimo success/failed linkove radi lakšeg povratka
           const bankUrl = `${response.paymentUrl}&successUrl=${this.successUrl}&failedUrl=${this.failedUrl}`;
-          
+          console.log("🔗 Preusmeravam na Banku:", bankUrl);
           window.location.href = bankUrl;
         }
       },
       error: (err: any) => {
-        console.error("Greška:", err);
+        console.error("❌ Greška pri inicijalizaciji plaćanja:", err);
         alert("Greška: Card servis ili Banka nisu dostupni.");
       }
     });

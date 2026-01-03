@@ -13,4 +13,11 @@ public class CardPaymentRequest {
     private String currency;
     private String merchantOrderId; // ID transakcije (STAN)
     private String merchantTimestamp;
+
+    // Dodaj ovo polje u CardPaymentRequest
+private Long pspTransactionId;
+
+// I getter/setter
+public Long getPspTransactionId() { return pspTransactionId; }
+public void setPspTransactionId(Long pspTransactionId) { this.pspTransactionId = pspTransactionId; }
 }

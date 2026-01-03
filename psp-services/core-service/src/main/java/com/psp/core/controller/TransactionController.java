@@ -21,7 +21,9 @@ import java.util.Random;
 
 @RestController
 @RequestMapping("/transactions")
-//@CrossOrigin(origins = "http://localhost:4200") // <--- OBAVEZNO DODAJ OVO
+// Ako Angular ide preko Gateway-a (8080), on već rešava CORS. 
+// Ako ide direktno, otkomentariši liniju ispod:
+// @CrossOrigin(origins = "http://localhost:4200") 
 public class TransactionController {
 
     @Autowired
@@ -33,6 +35,20 @@ public class TransactionController {
     @GetMapping
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
+    }
+
+    // --- NOVA METODA ZA AŽURIRANJE METODE PLAĆANJA (npr. CARD, QR) ---
+    @PutMapping("/update-method/{id}")
+    @Transactional
+    public ResponseEntity<?> updatePaymentMethod(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        System.out.println("🔄 CORE: Ažuriranje metode za transakciju ID: " + id);
+        return transactionRepository.findById(id).map(transaction -> {
+            String method = body.get("method");
+            transaction.setPaymentMethod(method);
+            transactionRepository.save(transaction);
+            System.out.println("✅ CORE: Metoda postavljena na: " + method);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/initiate") 
@@ -80,12 +96,11 @@ public class TransactionController {
     }
     
     @GetMapping("/{id}")
-    //@CrossOrigin(origins = "http://localhost:4200") // Dodaj samo ovde ako Angular gađa port 8081 direktno
-public ResponseEntity<Transaction> getTransactionDetails(@PathVariable Long id) {
-    return transactionRepository.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-}
+    public ResponseEntity<Transaction> getTransactionDetails(@PathVariable Long id) {
+        return transactionRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     private String generateStan() {
         Random random = new Random();
@@ -93,59 +108,57 @@ public ResponseEntity<Transaction> getTransactionDetails(@PathVariable Long id) 
         return String.valueOf(number);
     }
 
-    // --- POPRAVLJEN WEBHOOK PREMA SPECIFIKACIJI ---
     @PutMapping("/update-status/{merchantOrderId}")
-@Transactional
-public ResponseEntity<?> updateTransactionStatus(
-        @PathVariable String merchantOrderId, 
-        @RequestBody Map<String, Object> statusUpdate) {
-    
-    String cleanId = merchantOrderId.trim();
-    System.out.println("🔔 CORE: Primio zahtev za ažuriranje ID: [" + cleanId + "]");
-
-    // Pretraga transakcije (ostaje ista logika)
-    Transaction transaction = transactionRepository.findByMerchantOrderId(cleanId);
-    if (transaction == null) {
-        List<Transaction> all = transactionRepository.findAll();
-        transaction = all.stream()
-            .filter(t -> (t.getMerchantOrderId() != null && t.getMerchantOrderId().equals(cleanId)) || 
-                         (t.getStan() != null && t.getStan().equals(cleanId)) ||
-                         (t.getId() != null && String.valueOf(t.getId()).equals(cleanId)))
-            .findFirst()
-            .orElse(null);
-    }
-
-    if (transaction != null) {
-        String status = (String) statusUpdate.get("status");
+    @Transactional
+    public ResponseEntity<?> updateTransactionStatus(
+            @PathVariable String merchantOrderId, 
+            @RequestBody Map<String, Object> statusUpdate) {
         
-        // --- LOGIKA ZA USPEŠNO PLAĆANJE ---
-        if ("SUCCESS".equalsIgnoreCase(status) || "PAID".equalsIgnoreCase(status)) {
-            transaction.setStatus("PAID");
+        String cleanId = merchantOrderId.trim();
+        System.out.println("🔔 CORE: Primio zahtev za ažuriranje ID: [" + cleanId + "]");
 
-            if (statusUpdate.containsKey("globalTransactionId")) {
-                transaction.setGlobalTransactionId(statusUpdate.get("globalTransactionId").toString());
-            }
-
-            if (statusUpdate.containsKey("acquirerTimestamp")) {
-                try {
-                    transaction.setAcquirerTimestamp(LocalDateTime.parse(statusUpdate.get("acquirerTimestamp").toString()));
-                } catch (Exception e) {
-                    transaction.setAcquirerTimestamp(LocalDateTime.now());
-                }
-            }
-            System.out.println("✅ CORE: Transakcija " + transaction.getId() + " status -> PAID");
-        } 
-        // --- NOVA LOGIKA ZA ODBIJENO PLAĆANJE ---
-        else if ("FAILED".equalsIgnoreCase(status)) {
-            transaction.setStatus("FAILED");
-            System.out.println("❌ CORE: Transakcija " + transaction.getId() + " status -> FAILED");
+        Transaction transaction = transactionRepository.findByMerchantOrderId(cleanId);
+        if (transaction == null) {
+            List<Transaction> all = transactionRepository.findAll();
+            transaction = all.stream()
+                .filter(t -> (t.getMerchantOrderId() != null && t.getMerchantOrderId().equals(cleanId)) || 
+                             (t.getStan() != null && t.getStan().equals(cleanId)) ||
+                             (t.getId() != null && String.valueOf(t.getId()).equals(cleanId)))
+                .findFirst()
+                .orElse(null);
         }
 
-        transactionRepository.saveAndFlush(transaction);
-        return ResponseEntity.ok().build();
-    }
+        if (transaction != null) {
+            String status = (String) statusUpdate.get("status");
+            
+            if ("SUCCESS".equalsIgnoreCase(status) || "PAID".equalsIgnoreCase(status)) {
+                transaction.setStatus("PAID");
 
-    System.out.println("❌ CORE: Transakcija [" + cleanId + "] nije pronađena.");
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
-}
+                if (statusUpdate.containsKey("globalTransactionId")) {
+                    transaction.setGlobalTransactionId(statusUpdate.get("globalTransactionId").toString());
+                }
+
+                if (statusUpdate.containsKey("acquirerTimestamp")) {
+                    try {
+                        transaction.setAcquirerTimestamp(LocalDateTime.parse(statusUpdate.get("acquirerTimestamp").toString()));
+                    } catch (Exception e) {
+                        transaction.setAcquirerTimestamp(LocalDateTime.now());
+                    }
+                }
+                System.out.println("✅ CORE: Transakcija " + transaction.getId() + " status -> PAID");
+            } 
+            else if ("FAILED".equalsIgnoreCase(status)) {
+                transaction.setStatus("FAILED");
+                if (statusUpdate.containsKey("reason")) {
+                    transaction.setReason(statusUpdate.get("reason").toString());
+                }
+                System.out.println("❌ CORE: Transakcija " + transaction.getId() + " status -> FAILED");
+            }
+
+            transactionRepository.saveAndFlush(transaction);
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
+    }
 }

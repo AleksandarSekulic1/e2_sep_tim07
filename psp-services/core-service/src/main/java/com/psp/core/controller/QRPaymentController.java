@@ -31,13 +31,12 @@ public ResponseEntity<?> generateQRCode(@PathVariable Long pspTransactionId) {
         try {
             // NBS IPS Format (Standard Skeniraj i plati)
             String ipsString = String.format(
-                "K:PR|V:01|C:1|R:%s|N:%s|I:RSD%.2f|P:Placanje usluge %s",
-                "265000000012345678", 
-                "Rent-A-Car Agency",   
-                transaction.getAmount(),
-                transaction.getMerchantOrderId()
-            ).replace(".", ",");
-
+    "K:PR|V:01|C:1|R:%s|N:%s|I:RSD%.2f|P:Placanje usluge %d", // Koristimo %d za Long ID
+    "265000000012345678", 
+    "Rent-A-Car Agency",   
+    transaction.getAmount(),
+    transaction.getId() // <--- OVDE STAVI ID TRANSAKCIJE IZ BAZE, ne MerchantOrderId
+).replace(".", ",");
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(ipsString, BarcodeFormat.QR_CODE, 300, 300);
 
