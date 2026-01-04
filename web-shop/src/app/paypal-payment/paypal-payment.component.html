@@ -1,0 +1,82 @@
+<div class="paypal-outer-wrapper">
+  <div class="paypal-container">
+    <!-- Header -->
+    <div class="paypal-header">
+      <div class="logo">
+        <span class="paypal-logo">Pay</span><span class="pal-logo">Pal</span>
+      </div>
+      <h2>Prijavite se na PayPal</h2>
+    </div>
+
+    <!-- Timer -->
+    <div class="timer-section" [class.warning]="isExpiringSoon">
+      <span class="timer-icon">⏱️</span>
+      <span class="timer-text">Sesija ističe za: </span>
+      <strong class="timer-value">{{ timeLeft }}</strong>
+    </div>
+
+    <!-- Transaction Info -->
+    <div class="transaction-info">
+      <p>Iznos transakcije:</p>
+      <h3>{{ amount | number:'1.2-2' }} RSD</h3>
+    </div>
+
+    <!-- Login Form -->
+    <div class="login-form" *ngIf="!isExpired && !isSuccess && !isProcessing">
+      <div class="form-group">
+        <label>Email ili mobilni broj</label>
+        <input
+          type="email"
+          [(ngModel)]="paypalData.email"
+          placeholder="korisnik@primer.com"
+          [disabled]="isProcessing"
+          class="paypal-input"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Lozinka</label>
+        <input
+          type="password"
+          [(ngModel)]="paypalData.password"
+          placeholder="Unesite lozinku"
+          [disabled]="isProcessing"
+          class="paypal-input"
+        />
+      </div>
+
+      <button
+        class="paypal-btn-primary"
+        (click)="submitPayment()"
+        [disabled]="isProcessing || !paypalData.email || !paypalData.password"
+      >
+        Prijavite se
+      </button>
+
+      <button
+        class="paypal-btn-secondary"
+        (click)="cancelPayment()"
+        [disabled]="isProcessing"
+      >
+        Otkaži plaćanje
+      </button>
+
+      <p class="help-text">
+        Za testiranje: Koristite bilo koji email (bez 'invalid' u nazivu)
+      </p>
+    </div>
+
+    <!-- Status Message -->
+    <div class="status-message" *ngIf="message"
+         [class.success]="isSuccess"
+         [class.error]="!isSuccess && message">
+      {{ message }}
+    </div>
+
+    <!-- Footer -->
+    <div class="paypal-footer">
+      <p>🔒 Sigurna PayPal komunikacija</p>
+      <p class="small-text">© 2026 PayPal - Simulacija sistema</p>
+    </div>
+  </div>
+</div>

@@ -23,4 +23,9 @@ export class PaymentService {
     // Šaljemo na Gateway (/card/...), a on prosleđuje Card servisu (/cards/pay)
     return this.http.post(`${this.GATEWAY_URL}/card/cards/pay`, cardRequest);
   }
+
+  // 3. Izbor PayPal plaćanja (PSP -> PayPal Service)
+  payWithPayPal(paypalRequest: any): Observable<any> {
+    return this.http.post(`${this.GATEWAY_URL}/paypal/paypal/create-payment`, paypalRequest);
+  }
 }

@@ -7,7 +7,7 @@
                 <strong>#{{ transactionId }}</strong>
             </div>
         </div>
-        
+
         <div class="methods-grid">
             <div class="method-card active" (click)="chooseCard()">
                 <div class="icon-wrapper">💳</div>
@@ -23,10 +23,11 @@
                 <span class="badge ips">IPS Standard</span>
             </div>
 
-            <div class="method-card disabled">
+            <div class="method-card active" (click)="choosePayPal()">
                 <div class="icon-wrapper">🅿️</div>
                 <h3>PayPal</h3>
-                <p>Uskoro dostupno</p>
+                <p>Brzo i sigurno plaćanje</p>
+                <span class="badge paypal">PayPal</span>
             </div>
 
             <div class="method-card disabled">
@@ -35,7 +36,7 @@
                 <p>Uskoro dostupno</p>
             </div>
         </div>
-        
+
         <div class="psp-footer">
             <p>🔒 Sigurna komunikacija sa bankom je aktivna</p>
         </div>
