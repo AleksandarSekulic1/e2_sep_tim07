@@ -1,19 +1,28 @@
 package com.psp.paypal.service;
 
+import com.paypal.core.PayPalHttpClient;
+import com.paypal.http.HttpResponse;
+import com.paypal.orders.*;
 import com.psp.paypal.dto.PayPalPaymentRequest;
 import com.psp.paypal.model.PayPalTransaction;
 import com.psp.paypal.repository.PayPalTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
+/**
+ * PayPal Service - Real PayPal API Integration
+ * Uses PayPal Orders API v2 for payment processing
+ * Documentation: https://developer.paypal.com/docs/api/orders/v2/
+ */
 @Service
 public class PayPalService {
 
@@ -23,82 +32,152 @@ public class PayPalService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private PayPalHttpClient payPalHttpClient;
+
+    @Value("${paypal.return-url}")
+    private String returnUrl;
+
+    @Value("${paypal.cancel-url}")
+    private String cancelUrl;
+
     private final String CORE_SERVICE_UPDATE_METHOD_URL = "http://core-service:8080/transactions/update-method/";
     private final String CORE_SERVICE_UPDATE_STATUS_URL = "http://core-service:8080/transactions/update-status/";
 
-    // 1. Kreiranje PayPal plaćanja
+    /**
+     * Creates a PayPal order using the real PayPal Orders API v2
+     * @param request Payment request with amount and merchant details
+     * @return Map containing orderId and approval URL
+     */
     public Map<String, String> createPayment(PayPalPaymentRequest request) {
-        // Update metode u Core servisu
-        updateCoreTransactionMethod(request.getPspTransactionId());
+        try {
+            // Update payment method in Core service
+            updateCoreTransactionMethod(request.getPspTransactionId());
 
-        // Generisanje PayPal Payment ID (simulacija)
-        String paypalPaymentId = "PAYPAL-" + UUID.randomUUID().toString();
-        Instant expiryTime = Instant.now().plus(15, ChronoUnit.MINUTES);
+            // Build PayPal Order Request
+            OrderRequest orderRequest = buildOrderRequest(request);
 
-        // Kreiranje approval URL-a (simulacija PayPal login stranice)
-        String approvalUrl = "http://localhost:4200/paypal-payment/" + paypalPaymentId +
-                             "?amount=" + request.getAmount() +
-                             "&merchantOrderId=" + request.getMerchantOrderId() +
-                             "&expiresAt=" + expiryTime.toString();
+            // Create order via PayPal API
+            OrdersCreateRequest ordersCreateRequest = new OrdersCreateRequest();
+            ordersCreateRequest.prefer("return=representation");
+            ordersCreateRequest.requestBody(orderRequest);
 
-        // Čuvanje transakcije u MongoDB
-        PayPalTransaction transaction = new PayPalTransaction();
-        transaction.setPspTransactionId(request.getPspTransactionId());
-        transaction.setMerchantOrderId(request.getMerchantOrderId());
-        transaction.setAmount(request.getAmount());
-        transaction.setCurrency(request.getCurrency());
-        transaction.setPaypalPaymentId(paypalPaymentId);
-        transaction.setStatus("CREATED");
-        transaction.setApprovalUrl(approvalUrl);
-        transaction.setCreatedAt(LocalDateTime.now());
-        repository.save(transaction);
+            HttpResponse<Order> response = payPalHttpClient.execute(ordersCreateRequest);
+            Order order = response.result();
 
-        Map<String, String> response = new HashMap<>();
-        response.put("paymentId", paypalPaymentId);
-        response.put("approvalUrl", approvalUrl);
-        response.put("expiresAt", expiryTime.toString());
-        return response;
+            // Extract approval URL from PayPal response
+            String approvalUrl = order.links().stream()
+                    .filter(link -> "approve".equals(link.rel()))
+                    .findFirst()
+                    .map(LinkDescription::href)
+                    .orElseThrow(() -> new RuntimeException("No approval URL found"));
+
+            // Save transaction to MongoDB
+            PayPalTransaction transaction = new PayPalTransaction();
+            transaction.setPspTransactionId(request.getPspTransactionId());
+            transaction.setMerchantOrderId(request.getMerchantOrderId());
+            transaction.setAmount(request.getAmount());
+            transaction.setCurrency(request.getCurrency());
+            transaction.setPaypalPaymentId(order.id());
+            transaction.setStatus(order.status());
+            transaction.setApprovalUrl(approvalUrl);
+            transaction.setCreatedAt(LocalDateTime.now());
+            repository.save(transaction);
+
+            // Prepare response
+            Map<String, String> result = new HashMap<>();
+            result.put("paymentId", order.id());
+            result.put("approvalUrl", approvalUrl);
+            result.put("status", order.status());
+            
+            System.out.println("✅ PayPal Order Created: " + order.id());
+            return result;
+
+        } catch (IOException e) {
+            System.err.println("❌ PayPal API Error: " + e.getMessage());
+            
+            // Extract more detailed error information
+            String errorMessage = e.getMessage();
+            if (errorMessage != null) {
+                if (errorMessage.contains("CURRENCY_NOT_SUPPORTED")) {
+                    errorMessage = "Currency not supported by PayPal. Supported currencies: USD, EUR, GBP, CAD, AUD, JPY, etc. Full list: https://developer.paypal.com/docs/reports/reference/paypal-supported-currencies/";
+                } else if (errorMessage.contains("AUTHENTICATION_FAILURE")) {
+                    errorMessage = "PayPal authentication failed. Check your Client ID and Secret in application.yml";
+                }
+            }
+            
+            throw new RuntimeException("Failed to create PayPal payment: " + errorMessage);
+        }
     }
 
-    // 2. Izvršavanje plaćanja nakon PayPal autorizacije
+    /**
+     * Captures/executes a PayPal order after user approval
+     * @param paymentId PayPal order ID
+     * @param payerId PayPal payer ID (optional, captured automatically)
+     * @param merchantOrderId Merchant order ID for tracking
+     * @return Map containing payment status
+     */
     public Map<String, String> executePayment(String paymentId, String payerId, String merchantOrderId) {
-        PayPalTransaction transaction = repository.findByPaypalPaymentId(paymentId)
-                .orElseThrow(() -> new RuntimeException("PAYMENT_NOT_FOUND"));
+        try {
+            PayPalTransaction transaction = repository.findByPaypalPaymentId(paymentId)
+                    .orElseThrow(() -> new RuntimeException("PAYMENT_NOT_FOUND"));
 
-        if (!"CREATED".equals(transaction.getStatus())) {
-            throw new RuntimeException("PAYMENT_ALREADY_PROCESSED");
-        }
+            // Capture the order via PayPal API
+            OrdersCaptureRequest captureRequest = new OrdersCaptureRequest(paymentId);
+            captureRequest.prefer("return=representation");
 
-        // Simulacija PayPal validacije (u realnom sistemu ovde bi se pozivao PayPal API)
-        boolean isPayerValid = validatePayer(payerId);
+            HttpResponse<Order> response = payPalHttpClient.execute(captureRequest);
+            Order capturedOrder = response.result();
 
-        if (isPayerValid) {
-            // Uspešna transakcija
-            transaction.setPaypalPayerId(payerId);
-            transaction.setStatus("COMPLETED");
-            transaction.setCompletedAt(LocalDateTime.now());
-            repository.save(transaction);
+            // Check capture status
+            if ("COMPLETED".equals(capturedOrder.status())) {
+                // Update transaction
+                transaction.setPaypalPayerId(payerId);
+                transaction.setStatus("COMPLETED");
+                transaction.setCompletedAt(LocalDateTime.now());
+                repository.save(transaction);
 
-            // Notifikacija Core servisa
-            notifyCoreService(merchantOrderId, "SUCCESS", paymentId, null);
+                // Notify Core Service
+                notifyCoreService(merchantOrderId, "SUCCESS", paymentId, null);
 
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "SUCCESS");
-            response.put("paymentId", paymentId);
-            return response;
-        } else {
-            // Neuspešna transakcija
-            transaction.setStatus("FAILED");
-            transaction.setErrorMessage("INVALID_PAYER");
-            repository.save(transaction);
+                Map<String, String> result = new HashMap<>();
+                result.put("status", "SUCCESS");
+                result.put("paymentId", paymentId);
+                result.put("captureStatus", capturedOrder.status());
+                
+                System.out.println("✅ PayPal Payment Captured: " + paymentId);
+                return result;
 
-            notifyCoreService(merchantOrderId, "FAILED", null, "INVALID_PAYER");
+            } else {
+                // Payment not completed
+                transaction.setStatus("FAILED");
+                transaction.setErrorMessage("CAPTURE_FAILED");
+                repository.save(transaction);
 
-            throw new RuntimeException("INVALID_PAYER");
+                notifyCoreService(merchantOrderId, "FAILED", null, "CAPTURE_FAILED");
+                throw new RuntimeException("Payment capture failed: " + capturedOrder.status());
+            }
+
+        } catch (IOException e) {
+            System.err.println("❌ PayPal Capture Error: " + e.getMessage());
+            
+            // Update transaction status
+            repository.findByPaypalPaymentId(paymentId).ifPresent(transaction -> {
+                transaction.setStatus("FAILED");
+                transaction.setErrorMessage(e.getMessage());
+                repository.save(transaction);
+            });
+            
+            notifyCoreService(merchantOrderId, "FAILED", null, e.getMessage());
+            throw new RuntimeException("Failed to capture payment: " + e.getMessage());
         }
     }
 
-    // 3. Otkazivanje plaćanja
+    /**
+     * Cancels a PayPal payment
+     * @param paymentId PayPal order ID
+     * @param merchantOrderId Merchant order ID
+     */
     public void cancelPayment(String paymentId, String merchantOrderId) {
         PayPalTransaction transaction = repository.findByPaypalPaymentId(paymentId).orElse(null);
         
@@ -108,17 +187,65 @@ public class PayPalService {
         }
 
         notifyCoreService(merchantOrderId, "FAILED", null, "USER_CANCELLED");
+        System.out.println("❌ Payment Cancelled: " + paymentId);
     }
 
-    // Pomoćne metode
+    /**
+     * Builds PayPal OrderRequest according to API v2 specification
+     */
+    private OrderRequest buildOrderRequest(PayPalPaymentRequest request) {
+        OrderRequest orderRequest = new OrderRequest();
+        
+        // Set intent to CAPTURE (immediate payment)
+        orderRequest.checkoutPaymentIntent("CAPTURE");
+
+        // Determine currency - trim whitespace and default to USD
+        String currency = (request.getCurrency() != null && !request.getCurrency().trim().isEmpty()) 
+                ? request.getCurrency().trim().toUpperCase() 
+                : "USD";
+        
+        // Log request details for debugging
+        System.out.println("🔍 Creating PayPal Order:");
+        System.out.println("   Amount: " + request.getAmount());
+        System.out.println("   Currency: '" + currency + "' (length: " + currency.length() + ")");
+        System.out.println("   Order ID: " + request.getMerchantOrderId());
+
+        // Build purchase units
+        List<PurchaseUnitRequest> purchaseUnits = new ArrayList<>();
+        PurchaseUnitRequest purchaseUnit = new PurchaseUnitRequest()
+                .referenceId(request.getMerchantOrderId())
+                .description("Payment for Order " + request.getMerchantOrderId())
+                .customId(request.getMerchantOrderId())
+                .amountWithBreakdown(new AmountWithBreakdown()
+                        .currencyCode(currency)
+                        .value(String.format("%.2f", request.getAmount())));
+        
+        purchaseUnits.add(purchaseUnit);
+        orderRequest.purchaseUnits(purchaseUnits);
+
+        // Application context (return/cancel URLs)
+        ApplicationContext applicationContext = new ApplicationContext()
+                .returnUrl(returnUrl + "?merchantOrderId=" + request.getMerchantOrderId())
+                .cancelUrl(cancelUrl + "?merchantOrderId=" + request.getMerchantOrderId())
+                .brandName("PSP Payment System")
+                .landingPage("BILLING")
+                .shippingPreference("NO_SHIPPING")
+                .userAction("PAY_NOW");
+        
+        orderRequest.applicationContext(applicationContext);
+
+        return orderRequest;
+    }
+
+    // Helper methods
     private void updateCoreTransactionMethod(Long pspTransactionId) {
         try {
             Map<String, String> updateRequest = new HashMap<>();
             updateRequest.put("method", "PAYPAL");
             restTemplate.put(CORE_SERVICE_UPDATE_METHOD_URL + pspTransactionId, updateRequest);
-            System.out.println("✅ CORE: Metoda PAYPAL upisana za ID: " + pspTransactionId);
+            System.out.println("✅ CORE: Method PAYPAL set for ID: " + pspTransactionId);
         } catch (Exception e) {
-            System.err.println("⚠️ CORE ERROR: Neuspešan upis metode: " + e.getMessage());
+            System.err.println("⚠️ CORE ERROR: Failed to update method: " + e.getMessage());
         }
     }
 
@@ -131,15 +258,9 @@ public class PayPalService {
             statusUpdate.put("acquirerTimestamp", LocalDateTime.now().toString());
 
             restTemplate.put(CORE_SERVICE_UPDATE_STATUS_URL + merchantOrderId, statusUpdate);
-            System.out.println("📞 WEBHOOK [" + status + "] -> Razlog: " + reason);
+            System.out.println("📞 WEBHOOK [" + status + "] -> Reason: " + reason);
         } catch (Exception e) {
-            System.err.println("⚠️ Greška pri slanju statusa Core servisu: " + e.getMessage());
+            System.err.println("⚠️ Error notifying Core service: " + e.getMessage());
         }
-    }
-
-    private boolean validatePayer(String payerId) {
-        // Simulacija validacije - u realnom sistemu bi se pozvao PayPal API
-        // Za testiranje: prihvata sve PayPal ID-ove osim "INVALID"
-        return payerId != null && !payerId.equals("INVALID");
     }
 }

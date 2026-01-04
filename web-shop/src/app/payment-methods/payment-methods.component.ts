@@ -85,7 +85,7 @@ export class PaymentMethodsComponent implements OnInit {
       pspTransactionId: this.transactionId,
       merchantOrderId: this.transactionId,
       amount: this.amount,
-      currency: "RSD",
+      currency: "USD", // PayPal supports USD, EUR, GBP, etc. - NOT RSD
       merchantTimestamp: new Date().toISOString()
     };
 
