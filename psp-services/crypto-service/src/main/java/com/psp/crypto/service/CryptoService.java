@@ -192,6 +192,14 @@ public class CryptoService {
         }
         String code = currency == null ? "USD" : currency.trim().toUpperCase();
         double rate;
+        
+        // Handle RSD conversion (approx 117 RSD = 1 EUR)
+        if ("RSD".equals(code)) {
+            double amountInEur = amount / 117.0;
+            rate = rates.eur;
+            return roundCrypto(amountInEur / rate);
+        }
+
         switch (code) {
             case "EUR":
                 rate = rates.eur;

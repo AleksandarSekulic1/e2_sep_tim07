@@ -118,10 +118,6 @@ export class CryptoPaymentComponent implements OnInit, OnDestroy {
     }
   }
 
-  getQrImageUrl(): string {
-    return 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(this.qr);
-  }
-
   getExplorerUrl(): string {
     if (this.txHash) {
       return 'https://sepolia.etherscan.io/tx/' + this.txHash;

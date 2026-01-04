@@ -48,11 +48,6 @@
     <p>Fiat referenca: {{ fiat }}</p>
     <p>Adresa za uplatu:</p>
     <code class="address-box">{{ address }}</code>
-
-    <div class="qr">
-      <img [src]="getQrImageUrl()" alt="QR" />
-      <p class="qr-uri">URI: {{ qr }}</p>
-    </div>
   </div>
 
   <div class="explorer-link">
@@ -64,7 +59,7 @@
     <ol>
       <li><strong>Sa MetaMask:</strong> Kliknite "Poveži MetaMask" i platite direktno</li>
       <li><strong>Ručno:</strong> Nabavite Sepolia ETH sa <a href="https://sepoliafaucet.com/" target="_blank">sepoliafaucet.com</a></li>
-      <li>Skenirajte QR kod ili kopirajte adresu</li>
+      <li>Kopirajte adresu</li>
       <li>Pošaljite tačan ETH iznos</li>
       <li>Potvrda za ~12 sekundi! ⚡</li>
     </ol>

@@ -14,6 +14,7 @@ export class PaymentMethodsComponent implements OnInit {
 
   transactionId: string = '';
   amount: number = 0; // Ovde bismo idealno učitali iznos sa backenda, za sad može biti placeholder
+  currency: string = 'RSD';
   successUrl: string = '';
   failedUrl: string = '';
 
@@ -29,11 +30,14 @@ export class PaymentMethodsComponent implements OnInit {
     const amountParam = this.route.snapshot.queryParamMap.get('amount');
     this.amount = amountParam ? Number(amountParam) : 5000;
 
+    // Hvatamo valutu
+    this.currency = this.route.snapshot.queryParamMap.get('currency') || 'RSD';
+
     // --- IZMENA: Hvatamo URL-ove za povratak ---
     this.successUrl = this.route.snapshot.queryParamMap.get('successUrl') || 'http://localhost:4200/success';
     this.failedUrl = this.route.snapshot.queryParamMap.get('failedUrl') || 'http://localhost:4200/failed';
 
-    console.log("PSP Podaci:", { id: this.transactionId, amount: this.amount, success: this.successUrl });
+    console.log("PSP Podaci:", { id: this.transactionId, amount: this.amount, currency: this.currency, success: this.successUrl });
   }
 
   chooseCard() {
@@ -50,7 +54,7 @@ export class PaymentMethodsComponent implements OnInit {
       merchantOrderId: this.transactionId,
 
       amount: this.amount,
-      currency: "RSD",
+      currency: this.currency,
       merchantTimestamp: new Date().toISOString()
     };
 
@@ -79,13 +83,19 @@ export class PaymentMethodsComponent implements OnInit {
   }
 
   choosePayPal() {
+    // PayPal doesn't support RSD
+    if (this.currency === 'RSD') {
+      alert('PayPal ne podržava RSD valutu. Molimo izaberite drugi način plaćanja.');
+      return;
+    }
+
     console.log("Biramo plaćanje putem PayPal-a...");
 
     const request = {
       pspTransactionId: this.transactionId,
       merchantOrderId: this.transactionId,
       amount: this.amount,
-      currency: "USD", // PayPal supports USD, EUR, GBP, etc. - NOT RSD
+      currency: this.currency,
       merchantTimestamp: new Date().toISOString()
     };
 
@@ -113,7 +123,7 @@ export class PaymentMethodsComponent implements OnInit {
       pspTransactionId: this.transactionId,
       merchantOrderId: this.transactionId,
       amount: this.amount,
-      currency: "USD", // fiat basis for conversion
+      currency: this.currency,
       cryptoType: "ETH", // Use Ethereum Sepolia for faster confirmations (~12 seconds)
       merchantTimestamp: new Date().toISOString()
     };
