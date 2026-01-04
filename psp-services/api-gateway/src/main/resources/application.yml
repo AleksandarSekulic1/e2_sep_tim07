@@ -57,6 +57,14 @@ spring:
           filters:
             - StripPrefix=1
 
+        # Rute za CRYPTO servis
+        - id: crypto-service
+          uri: http://crypto-service:8080
+          predicates:
+            - Path=/crypto/**
+          filters:
+            - StripPrefix=1
+
 # Logovanje za lakši debag tokom odbrane
 logging:
   level:

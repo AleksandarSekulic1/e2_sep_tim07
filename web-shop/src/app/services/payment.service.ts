@@ -28,4 +28,9 @@ export class PaymentService {
   payWithPayPal(paypalRequest: any): Observable<any> {
     return this.http.post(`${this.GATEWAY_URL}/paypal/paypal/create-payment`, paypalRequest);
   }
+
+  // 4. Izbor Crypto plaćanja (PSP -> Crypto Service)
+  payWithCrypto(cryptoRequest: any): Observable<any> {
+    return this.http.post(`${this.GATEWAY_URL}/crypto/crypto/create-payment`, cryptoRequest);
+  }
 }

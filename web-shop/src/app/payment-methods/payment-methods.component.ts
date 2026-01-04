@@ -106,4 +106,35 @@ export class PaymentMethodsComponent implements OnInit {
     });
   }
 
+  chooseCrypto() {
+    console.log("Biramo plaćanje kriptovalutom (Ethereum Sepolia - brže potvrde!)...");
+
+    const request = {
+      pspTransactionId: this.transactionId,
+      merchantOrderId: this.transactionId,
+      amount: this.amount,
+      currency: "USD", // fiat basis for conversion
+      cryptoType: "ETH", // Use Ethereum Sepolia for faster confirmations (~12 seconds)
+      merchantTimestamp: new Date().toISOString()
+    };
+
+    this.paymentService.payWithCrypto(request).subscribe({
+      next: (response: any) => {
+        const params = new URLSearchParams({
+          address: response.address,
+          amountCrypto: response.cryptoAmount.toString(),
+          fiat: `${response.fiatAmount} ${response.fiatCurrency}`,
+          qr: response.qrData,
+          network: response.network,
+          cryptoType: response.cryptoType,
+          privateKeyWif: response.privateKeyWif
+        });
+        window.location.href = `http://localhost:4200/crypto-payment/${this.transactionId}?${params.toString()}`;
+      },
+      error: (err: any) => {
+        console.error("❌ Greška pri inicijalizaciji Crypto plaćanja:", err);
+        alert("Greška: Crypto servis nije dostupan.");
+      }
+    });
+  }
 }
