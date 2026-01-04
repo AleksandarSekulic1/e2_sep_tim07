@@ -1,26 +1,73 @@
-<div class="qr-container">
-  <h2>📱 IPS Skeniraj i plati</h2>
-  <p>Iznos za uplatu: <strong>{{ amount | number:'1.2-2' }} RSD</strong></p>
-  
-  <div class="qr-frame" *ngIf="qrCodeBase64">
-    <img [src]="'data:image/png;base64,' + qrCodeBase64" alt="IPS QR Kod">
-    <div class="ips-string-box">
-      <small>NBS IPS Standard:</small>
-      <code>{{ ipsString }}</code>
+<div class="qr-outer-wrapper">
+  <div class="qr-container">
+    <div class="qr-header">
+      <h2>📱 IPS Skeniraj i plati</h2>
+      <p>Iznos za uplatu: <span class="amount-highlight">{{ amount | number:'1.2-2' }} RSD</span></p>
     </div>
-  </div>
+    
+    <div class="qr-frame-outer" *ngIf="qrCodeBase64">
+      <div class="qr-frame">
+        <img [src]="'data:image/png;base64,' + qrCodeBase64" alt="IPS QR Kod">
+        
+        <div class="ips-string-box">
+          <div class="ips-header-mini">
+            <span class="ips-badge">IPS</span>
+            <small>NBS Standardni podaci</small>
+          </div>
+          
+          <div class="ips-details">
+            <div class="ips-row">
+              <span class="label">Primaoc:</span>
+              <span class="value">Rent-A-Car Agency DOO</span>
+            </div>
+            <div class="ips-row">
+              <span class="label">Račun:</span>
+              <span class="value">265000000012345678</span>
+            </div>
+            <div class="ips-row">
+              <span class="label">Poziv na broj:</span>
+              <span class="value">RO:{{ transactionId }}</span>
+            </div>
+          </div>
 
-  <div class="loader" *ngIf="!qrCodeBase64">Generisanje koda...</div>
+          <div class="ips-raw-data">
+            <details>
+              <summary>Prikaži sirovi IPS kod</summary>
+              <code>{{ ipsString }}</code>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <div class="instructions">
-    <p>1. Otvorite aplikaciju mobilnog bankarstva</p>
-    <p>2. Izaberite opciju <strong>"IPS Skeniraj"</strong></p>
-    <p>3. Skenirajte kod iznad i potvrdite uplatu</p>
-  </div>
+    <div class="loader-container" *ngIf="!qrCodeBase64 && !message">
+      <div class="spinner"></div>
+      <p>Generisanje koda...</p>
+    </div>
 
-  <div class="simulation-area">
-    <button (click)="simulateQRAppPayment()" class="btn-simulate">
-        🚀 Simuliraj mBanking potvrdu
-    </button>
+    <div *ngIf="message" class="status-message" [ngClass]="message.includes('❌') ? 'error' : 'success'">
+      {{ message }}
+    </div>
+
+    <div class="instructions-section">
+      <div class="instruction-item">
+        <span class="step-number">1</span>
+        <p>Otvorite mBanking aplikaciju</p>
+      </div>
+      <div class="instruction-item">
+        <span class="step-number">2</span>
+        <p>Izaberite <strong>"IPS Skeniraj"</strong></p>
+      </div>
+      <div class="instruction-item">
+        <span class="step-number">3</span>
+        <p>Skenirajte kod i potvrdite uplatu</p>
+      </div>
+    </div>
+
+    <div class="simulation-area">
+      <button (click)="simulateQRAppPayment()" class="btn-simulate" [disabled]="!qrCodeBase64">
+          🚀 Simuliraj mBanking potvrdu
+      </button>
+    </div>
   </div>
 </div>

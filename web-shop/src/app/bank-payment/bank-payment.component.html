@@ -3,7 +3,7 @@
         <h2>🏦 ACQUIRER BANKA</h2>
         <p>Sigurno plaćanje karticom</p>
         <div class="timer" [class.warning]="isExpiringSoon">
-            Sesija ističe za: <strong>{{ timeLeft }}</strong>
+            <span class="hourglass">⏳</span> Sesija ističe za: <strong>{{ timeLeft }}</strong>
         </div>
     </div>
 
@@ -15,7 +15,6 @@
     <form (ngSubmit)="submitPayment()" *ngIf="!isSuccess && !isExpired">
         <div class="form-group">
             <label>Broj kartice (PAN)</label>
-            
             <div class="input-wrapper">
                 <input type="text" 
                        [(ngModel)]="cardData.pan" 
@@ -46,26 +45,22 @@
 
         <div class="form-group">
             <label>Ime vlasnika (CARD_HOLDER_NAME)</label>
-            <input type="text" [(ngModel)]="cardData.cardHolder" name="holder" placeholder="IME PREZIME" required>
+            <input type="text" [(ngModel)]="cardData.cardHolder" name="holder" placeholder="IME PREZIME" class="standard-input">
         </div>
 
         <div class="row">
-            <div class="form-group">
+            <div class="form-group w-50">
                 <label>Važi do (MM/YY)</label>
-                <input type="text" [(ngModel)]="cardData.expiryDate" name="expiry" placeholder="12/26" required>
+                <input type="text" [(ngModel)]="cardData.expiryDate" name="expiry" placeholder="12/28" class="standard-input">
             </div>
-            <div class="form-group">
-                <label>SECURITY_CODE (CVV/CVC)</label>
-                <input type="password" [(ngModel)]="cardData.cvv" name="cvv" placeholder="123" required>
+            <div class="form-group w-50">
+                <label>Security Code (CVV)</label>
+                <input type="password" [(ngModel)]="cardData.cvv" name="cvv" placeholder="123" class="standard-input">
             </div>
         </div>
 
         <button type="submit" class="btn-pay" [disabled]="isExpired">POTVRDI PLAĆANJE</button>
     </form>
-
-    <div *ngIf="isExpired" class="alert error">
-        Sesija za plaćanje je istekla. Molimo vratite se na prodavnicu i pokušajte ponovo.
-    </div>
 
     <div *ngIf="message" class="alert" [ngClass]="isSuccess ? 'success' : 'error'">
         {{ message }}

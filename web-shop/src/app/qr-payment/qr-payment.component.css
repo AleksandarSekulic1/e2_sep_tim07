@@ -1,138 +1,193 @@
+/* --- GLAVNI WRAPPER I KONTEJNER --- */
+.qr-outer-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  padding: 20px;
+  background-color: #f4f7f9;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
 .qr-container {
-    max-width: 500px;
-    margin: 50px auto;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    text-align: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 650px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+  text-align: center;
+  overflow: hidden;
 }
 
-h2 {
-    color: #2d3748;
-    margin-bottom: 10px;
-    font-size: 24px;
+/* --- HEADER --- */
+.qr-header {
+  background: #1a2a3a;
+  color: white;
+  padding: 40px 20px;
 }
 
-p {
-    color: #4a5568;
-    font-size: 18px;
-    margin-bottom: 25px;
+.qr-header h2 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 1px;
 }
 
-/* Okvir za QR kod koji simulira ekran terminala */
+.amount-highlight {
+  font-size: 32px;
+  font-weight: 800;
+  display: block;
+  margin-top: 10px;
+  color: #48bb78;
+}
+
+/* --- QR FRAME --- */
+.qr-frame-outer {
+  padding: 30px;
+  background: #fdfdfd;
+}
+
 .qr-frame {
-    background: #f7fafc;
-    border: 2px solid #e2e8f0;
-    padding: 20px;
-    border-radius: 12px;
-    display: inline-block;
-    margin-bottom: 25px;
-    transition: transform 0.3s ease;
-}
-
-.qr-frame:hover {
-    transform: scale(1.02);
-    border-color: #4299e1;
+  background: white;
+  border: 2px solid #edf2f7;
+  padding: 25px;
+  border-radius: 15px;
+  display: inline-block;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
 .qr-frame img {
-    display: block;
-    width: 250px;
-    height: 250px;
-    image-rendering: pixelated; /* Osigurava oštrinu QR koda */
+  width: 280px; /* Povećan QR kod za lakše skeniranje */
+  height: 280px;
+  display: block;
+  margin: 0 auto;
 }
 
-/* Instrukcije za korisnika */
-.instructions {
-    text-align: left;
-    background: #edf2f7;
-    padding: 20px;
-    border-radius: 10px;
-    border-left: 5px solid #4299e1;
-}
-
-.instructions p {
-    margin: 10px 0;
-    font-size: 15px;
-    color: #2d3748;
-    line-height: 1.4;
-}
-
-.instructions strong {
-    color: #2b6cb0;
-}
-
-/* Loader animacija dok se čeka kod */
-.loader {
-    font-weight: bold;
-    color: #4a5568;
-    padding: 40px;
-    font-style: italic;
-}
-
-/* Responzivnost za mobilne telefone */
-@media (max-width: 600px) {
-    .qr-container {
-        margin: 20px;
-        padding: 20px;
-    }
-    
-    .qr-frame img {
-        width: 200px;
-        height: 200px;
-    }
-}
-
-/* Stil za prikaz IPS stringa ispod QR koda */
+/* --- NOVI IPS STRING BOX (REŠENJE ZA PREKLAPANJE) --- */
 .ips-string-box {
-    margin-top: 15px;
-    padding: 10px;
-    background: #f1f5f9;
-    border-radius: 6px;
-    border: 1px dashed #cbd5e1;
+  margin-top: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: left;
+  max-width: 320px;
 }
 
-.ips-string-box small {
-    display: block;
-    color: #64748b;
-    font-size: 10px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
+.ips-header-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
-.ips-string-box code {
-    font-size: 11px;
-    color: #475569;
-    word-break: break-all; /* Da se string prelomi ako je dugačak */
+.ips-badge {
+  background: #3182ce;
+  color: white;
+  font-weight: bold;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-/* Stil za Simulator dugme */
-.simulation-area {
-    margin-top: 30px;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 20px;
+.ips-header-mini small {
+  color: #64748b;
+  font-size: 10px;
+  text-transform: uppercase;
 }
+
+.ips-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ips-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.ips-row .label { color: #94a3b8; }
+.ips-row .value { 
+  color: #334155; 
+  font-weight: 600; 
+  font-family: 'Courier New', monospace; 
+}
+
+.ips-raw-data {
+  margin-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+}
+
+.ips-raw-data summary {
+  font-size: 10px;
+  color: #3182ce;
+  cursor: pointer;
+}
+
+.ips-raw-data code {
+  font-size: 9px;
+  color: #64748b;
+  word-break: break-all;
+  display: block;
+  margin-top: 5px;
+}
+
+/* --- INSTRUKCIJE --- */
+.instructions-section {
+  display: flex;
+  justify-content: space-around;
+  padding: 25px;
+  background: #f1f5f9;
+}
+
+.instruction-item { flex: 1; }
+
+.step-number {
+  background: #3182ce;
+  color: white;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* --- STATUS PORUKE --- */
+.status-message {
+  margin: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.status-message.error { background: #fed7d7; color: #c53030; border: 1px solid #fc8181; }
+.status-message.success { background: #c6f6d5; color: #2f855a; border: 1px solid #48bb78; }
+
+/* --- DUGME --- */
+.simulation-area { padding: 30px; }
 
 .btn-simulate {
-    background: #48bb78; /* Zelena boja za uspeh */
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(72, 187, 120, 0.2);
+  width: 100%;
+  padding: 18px;
+  background: #48bb78;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.btn-simulate:hover {
-    background: #38a169;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(72, 187, 120, 0.3);
+.btn-simulate:hover:not(:disabled) {
+  background: #38a169;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(56, 161, 105, 0.2);
 }
 
-.btn-simulate:active {
-    transform: translateY(0);
-}
+.btn-simulate:disabled { background: #cbd5e1; cursor: not-allowed; }

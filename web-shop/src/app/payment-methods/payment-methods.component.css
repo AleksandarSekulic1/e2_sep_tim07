@@ -1,27 +1,102 @@
-.psp-container {
-    max-width: 800px;
-    margin: 50px auto;
-    text-align: center;
-    font-family: sans-serif;
-}
-.methods-grid {
+/* Centriranje cele forme na sredinu ekrana */
+.psp-outer-wrapper {
     display: flex;
-    gap: 20px;
     justify-content: center;
-    margin-top: 30px;
-}
-.method-card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
+    align-items: center;
+    min-height: 80vh;
     padding: 20px;
-    width: 150px;
+}
+
+.psp-container {
+    max-width: 1000px;
+    width: 100%;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.psp-header h2 {
+    font-size: 2.2rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.transaction-info {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-bottom: 40px;
+}
+
+.methods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.method-card {
+    background: #f8f9fa;
+    border: 2px solid #edf2f7;
+    border-radius: 16px;
+    padding: 30px 20px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
-.method-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    border-color: #007bff;
+
+/* Povećane ikone */
+.icon-wrapper {
+    font-size: 60px;
+    margin-bottom: 20px;
 }
-.method-card .icon { font-size: 40px; margin-bottom: 10px; }
-.disabled { opacity: 0.5; pointer-events: none; }
+
+.method-card h3 {
+    font-size: 1.4rem;
+    color: #2d3748;
+    margin: 10px 0;
+}
+
+.method-card p {
+    color: #718096;
+    font-size: 0.95rem;
+}
+
+/* Efekti za aktivne kartice */
+.method-card.active:hover {
+    transform: translateY(-10px);
+    border-color: #4299e1;
+    box-shadow: 0 15px 30px rgba(66, 153, 225, 0.15);
+    background: #fff;
+}
+
+/* Badge za preporuku */
+.badge {
+    position: absolute;
+    top: -12px;
+    background: #48bb78;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.badge.ips { background: #ed8936; }
+
+.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #f2f2f2;
+}
+
+.psp-footer {
+    margin-top: 50px;
+    color: #a0aec0;
+    font-size: 0.9rem;
+}

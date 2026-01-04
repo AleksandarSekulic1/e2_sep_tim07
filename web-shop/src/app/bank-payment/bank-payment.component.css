@@ -1,79 +1,73 @@
-/* --- GLAVNI OKVIR (POVEĆAN) --- */
+/* --- GLAVNI KONTEJNER (ŠIRI I PREGLEDNIJI) --- */
 .bank-container { 
-    max-width: 600px; /* <--- Povećano sa 480px na 600px */
-    margin: 50px auto; 
-    border: 1px solid #ccc; 
-    font-family: 'Helvetica Neue', Arial, sans-serif; 
-    background: #f9f9f9; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Jača senka za 3D efekat */
-    border-radius: 10px;
+    max-width: 650px; 
+    margin: 40px auto; 
+    border: none;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    background: #ffffff; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border-radius: 12px;
     overflow: hidden;
 }
 
-/* --- ZAGLAVLJE --- */
 .bank-header { 
-    background: #2c3e50; 
+    background: #1a2a3a; 
     color: white; 
-    padding: 30px; 
+    padding: 35px 20px; 
     text-align: center; 
 }
 
-.bank-header h2 {
-    font-size: 28px; /* Veći naslov */
-    margin: 0 0 10px 0;
-}
+.bank-header h2 { font-size: 30px; margin-bottom: 8px; }
 
-/* --- INFO O IZNOSU --- */
 .payment-info { 
     text-align: center; 
-    padding: 30px; 
-    background: #ecf0f1; 
-    border-bottom: 1px solid #ddd; 
+    padding: 25px; 
+    background: #f8fafc; 
+    border-bottom: 1px solid #e2e8f0; 
 }
 
 .payment-info h3 {
-    margin: 10px 0 0;
-    color: #2c3e50;
-    font-size: 32px; /* Veći font za iznos */
+    margin: 5px 0;
+    color: #1a202c;
+    font-size: 36px;
     font-weight: 800;
 }
 
-/* --- FORMA --- */
-form { padding: 40px; } /* Više prostora unutar forme */
+/* --- FORMA I POLJA --- */
+form { padding: 45px; }
 
-.form-group { margin-bottom: 25px; }
+.form-group { margin-bottom: 25px; position: relative; }
 
-/* --- NATPISI (LABELE) --- */
+.w-50 { width: 48%; } /* Polja u redu (Datum/CVV) */
+
 label { 
     display: block; 
-    margin-bottom: 10px; 
-    font-weight: bold; 
-    font-size: 16px; /* <--- POVEĆANO (Bilo je 13px) */
-    color: #444;
+    margin-bottom: 12px; 
+    font-weight: 600; 
+    font-size: 15px;
+    color: #4a5568;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-/* --- INPUT POLJA --- */
 input { 
     width: 100%; 
-    padding: 15px; /* Deblja polja */
-    border: 2px solid #ddd; /* Malo deblja linija */
-    border-radius: 6px; 
+    padding: 18px; 
+    border: 2px solid #cbd5e0; 
+    border-radius: 8px; 
     box-sizing: border-box; 
-    font-size: 20px; /* Krupan tekst dok kucaš */
-    letter-spacing: 2px; /* Razmak između brojeva */
-    color: #333;
-    transition: border-color 0.3s;
+    font-size: 22px; 
+    font-weight: 500;
+    color: #2d3748;
+    transition: all 0.2s ease;
 }
 
 input:focus {
-    border-color: #3498db;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
     outline: none;
-    background-color: #fff;
 }
 
-/* --- LOGIKA ZA SLIČICE --- */
+/* --- PAN INPUT SPECIJALNO (REŠENJE ZA LOGO) --- */
 .input-wrapper {
     position: relative;
     display: flex;
@@ -81,70 +75,240 @@ input:focus {
 }
 
 .pan-input {
-    padding-right: 110px; /* Još malo mesta za logoe */
+    padding-right: 150px !important; /* Dovoljno prostora da brojevi ne idu ispod logotipa */
+    letter-spacing: 3px;
 }
 
 .card-icons {
     position: absolute;
     right: 15px;
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 8px;
     pointer-events: none;
-    background: rgba(255, 255, 255, 0.9);
-    padding-left: 5px;
+    height: 100%;
 }
 
 .card-logo {
-    height: 32px; /* Veći logoi */
+    height: 28px;
     width: auto;
-    transition: all 0.3s ease;
-    opacity: 0.3;
     filter: grayscale(100%);
+    opacity: 0.2;
+    transition: all 0.3s;
 }
 
 .card-logo.active {
-    opacity: 1;
     filter: grayscale(0%);
-    transform: scale(1.15);
+    opacity: 1;
+    transform: scale(1.1);
 }
 
-.card-logo.faded { opacity: 0.1; }
-
-/* --- DUGMIĆI --- */
-.row { display: flex; gap: 20px; } /* Razmak između datum i CVV polja */
+/* --- DUGME I ROW --- */
+.row { display: flex; justify-content: space-between; }
 
 .btn-pay { 
     width: 100%; 
-    padding: 18px; /* Veće dugme */
-    background: #27ae60; 
+    padding: 20px; 
+    background: #38a169; 
     color: white; 
     border: none; 
-    border-radius: 6px; 
+    border-radius: 8px; 
     cursor: pointer; 
-    font-size: 20px; 
-    font-weight: bold; 
-    margin-top: 15px;
+    font-size: 22px; 
+    font-weight: 700; 
+    margin-top: 20px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: transform 0.1s, background 0.2s;
+    transition: background 0.2s;
 }
 
-.btn-pay:hover { 
-    background: #219150; 
-    transform: translateY(-2px);
+.btn-pay:hover { background: #2f855a; }
+.btn-pay:disabled { background: #cbd5e0; cursor: not-allowed; }
+
+.alert { padding: 18px; margin-top: 25px; border-radius: 8px; font-weight: bold; text-align: center; }
+.alert.success { background: #c6f6d5; color: #22543d; border: 1px solid #38a169; }
+.alert.error { background: #fed7d7; color: #822727; border: 1px solid #e53e3e; }
+
+/* --- KONTEJNER (DODATNO PROŠIREN) --- */
+.bank-container { 
+    max-width: 700px; /* Povećano na 700px za komfor */
+    margin: 40px auto; 
+    background: #ffffff; 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    border-radius: 15px;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
-.btn-pay:active { transform: translateY(0); }
+/* --- TAJMER SA ANIMACIJOM --- */
+.timer {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: inline-block;
+}
 
-/* --- ALERTI --- */
-.alert { 
-    padding: 20px; 
-    text-align: center; 
-    color: white; 
-    margin-top: 20px; 
-    border-radius: 6px; 
-    font-size: 16px;
+.hourglass {
+    display: inline-block;
+    animation: flip 2s infinite;
+    margin-right: 5px;
+}
+
+@keyframes flip {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+    100% { transform: rotate(180deg); }
+}
+
+.timer.warning {
+    color: #ff4d4d;
+    background: rgba(255, 0, 0, 0.1);
     font-weight: bold;
 }
-.alert.success { background: #27ae60; }
-.alert.error { background: #c0392b; }
+
+/* --- PAN INPUT (FIX ZA PREKLAPANJE) --- */
+.pan-input {
+    padding-right: 180px !important; /* EKSTRA PROSTOR DA LOGO NE SMETA */
+    letter-spacing: 4px !important; /* Bolja čitljivost brojeva */
+    font-size: 24px !important;
+}
+
+.card-icons {
+    position: absolute;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+    /* Dodata blaga pozadina iza logoa da se ne mešaju sa tekstom ako se dodirnu */
+    background: linear-gradient(to left, white 80%, transparent);
+    padding-left: 20px;
+}
+
+.card-logo {
+    height: 30px;
+    width: auto;
+    filter: grayscale(100%);
+    opacity: 0.15;
+}
+
+.card-logo.active {
+    filter: grayscale(0%);
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* --- OSTALA POLJA --- */
+.standard-input {
+    padding: 15px;
+    font-size: 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.btn-pay {
+    background: #2ecc71;
+    font-size: 22px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-pay:hover {
+    background: #27ae60;
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+}
+
+/* --- KONTEJNER (MAKSIMALNO PROŠIREN ZA KT1) --- */
+.bank-container { 
+    max-width: 800px; /* Povećano na 800px da sve "diše" */
+    margin: 40px auto; 
+    background: #ffffff; 
+    box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+    border-radius: 15px;
+    overflow: hidden;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- PAN INPUT (REŠENJE ZA SLIKU) --- */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.pan-input {
+    width: 100%;
+    padding: 22px 200px 22px 20px !important; /* Ogroman desni razmak za logotipe */
+    font-size: 26px !important; /* Krupan, jasan font */
+    letter-spacing: 2px !important; /* Smanjen razmak da 16 cifara stane komotno levo */
+    border: 3px solid #cbd5e0;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.card-icons {
+    position: absolute;
+    right: 5px; /* Pomereno skroz desno */
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 0 15px;
+    background: white; /* Bela pozadina prekriva brojeve ako odu previše desno */
+    border-left: 2px solid #edf2f7; /* Vizuelno odvaja logotipe od polja za kucanje */
+    height: 80%; /* Skoro cela visina inputa */
+    border-radius: 0 8px 8px 0;
+}
+
+.card-logo {
+    height: 35px; /* Još veći logoi */
+    width: auto;
+    filter: grayscale(100%);
+    opacity: 0.1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-logo.active {
+    filter: grayscale(0%);
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* --- TAJMER I HEADER --- */
+.bank-header { background: #1a2a3a; padding: 40px; color: white; text-align: center; }
+.timer { background: rgba(255,255,255,0.15); padding: 10px 20px; border-radius: 30px; font-size: 1.2rem; }
+.hourglass { display: inline-block; animation: flip 2s infinite; }
+
+@keyframes flip {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+}
+
+/* --- OSTALA POLJA --- */
+.standard-input {
+    padding: 18px;
+    font-size: 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.row { display: flex; gap: 30px; }
+.w-50 { width: 50%; }
+
+.btn-pay {
+    width: 100%;
+    padding: 22px;
+    background: #2ecc71;
+    color: white;
+    font-size: 24px;
+    font-weight: 800;
+    border-radius: 10px;
+    margin-top: 30px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(46, 204, 113, 0.2);
+}
+
+.btn-pay:hover { background: #27ae60; transform: translateY(-2px); }
