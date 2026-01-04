@@ -18,47 +18,43 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Podaci iz Tabele 1 specifikacije 
-    private String merchantId;       // ID prodavca
-    private Double amount;           // Iznos
-    private String currency;         // Valuta (npr. EUR, RSD)
-    private String merchantOrderId;  // ID narudžbine sa Web Shopa
-    private LocalDateTime merchantTimestamp; // Vreme kreiranja na Web Shopu
+    // Podaci za autentifikaciju i osnovni detalji
+    private String merchantId;
+    private Double amount;
+    private String currency;
+    private String merchantOrderId;
+    private LocalDateTime merchantTimestamp;
     
-    // Naša interna polja
-    @JsonProperty("paymentMethod") // Eksplicitno mapiranje za Jackson
-    private String paymentMethod;    // CARD, QR, PAYPAL, CRYPTO 
-    private String status;           // INITIATED, SUCCESS, FAILED, ERROR
+    // Statusi i metodi (CARD, QR, itd.)
+    @JsonProperty("paymentMethod")
+    private String paymentMethod;
+    private String status; // CREATED, PAID, FAILED, ERROR
+    private String reason; // Razlog odbijanja (npr. INVALID_CVV)
     
-    private String stan; // System Trace Audit Number (6 cifara)
-    private LocalDateTime pspTimestamp; // Vreme kad je PSP obradio zahtev
-    private String globalTransactionId; // ID koji nam vraća banka
-    private LocalDateTime acquirerTimestamp; // <--- DODAJ OVO
+    // Bankarski podaci za praćenje
+    private String stan; 
+    private LocalDateTime pspTimestamp;
+    private String globalTransactionId; 
+    private LocalDateTime acquirerTimestamp;
 
-    //@Transient // Ovo znači: "Ne čuvaj u bazu, samo koristi u memoriji"
+    // OSETLJIVI PODACI - MORAJU BITI @Transient
+    @Transient 
     private String cardHolder;
     
-    //@Transient
+    @Transient
     private String pan;
     
-    //@Transient
+    @Transient
     private String expiryDate;
     
-    //@Transient
+    @Transient
     private String cvv;
 
-    @Transient // Ne čuva se u istoriji transakcija, služi samo za proveru!
+    @Transient 
     private String merchantPassword;
 
-    // URL-ovi za redirekciju (čuvanje nije obavezno u bazi, ali korisno za logove)
+    // URL-ovi za navigaciju
     private String successUrl;
     private String failedUrl;
     private String errorUrl;
-
-    // Dodaj ovo polje u klasu Transaction
-private String reason;
-
-// I odgovarajući getter/setter ako nemaš @Data ili @Setter
-public String getReason() { return reason; }
-public void setReason(String reason) { this.reason = reason; }
 }
