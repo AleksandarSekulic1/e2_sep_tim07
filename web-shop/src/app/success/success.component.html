@@ -1,7 +1,19 @@
-<div class="result-container success">
-    <div class="icon">✅</div>
-    <h1>Uspešna Rezervacija!</h1>
-    <p>Vaša uplata je proknjižena. Vozilo vas čeka.</p>
-    
-    <a href="/" class="btn-home">Vrati se na početnu</a>
+<div class="result-container" [ngClass]="{
+    'success': status === 'success',
+    'error': status === 'failed',
+    'processing': status === 'processing'
+}">
+    <div class="icon">
+        <span *ngIf="status === 'processing'">⏳</span>
+        <span *ngIf="status === 'success'">✅</span>
+        <span *ngIf="status === 'failed'">❌</span>
+    </div>
+
+    <h1 *ngIf="status === 'success'">Plaćanje potvrđeno!</h1>
+    <h1 *ngIf="status === 'processing'">Obrađujem uplatu...</h1>
+    <h1 *ngIf="status === 'failed'">Plaćanje nije potvrđeno</h1>
+
+    <p>{{ message }}</p>
+
+    <a href="/" class="btn-home" *ngIf="status !== 'processing'">Vrati se na početnu</a>
 </div>
