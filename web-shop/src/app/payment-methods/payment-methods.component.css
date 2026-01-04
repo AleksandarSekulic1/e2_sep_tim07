@@ -88,6 +88,7 @@
 }
 
 .badge.ips { background: #ed8936; }
+.badge.paypal { background: #0070ba; }
 
 .disabled {
     opacity: 0.6;
