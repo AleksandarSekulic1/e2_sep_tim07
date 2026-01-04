@@ -92,8 +92,20 @@
 
 .disabled {
     opacity: 0.6;
-    cursor: not-allowed;
+    cursor: not-allowed !important;
     background: #f2f2f2;
+    pointer-events: none;
+}
+
+.disabled-text {
+    color: #e53e3e;
+    font-weight: 600;
+}
+
+.method-card.disabled:hover {
+    transform: none;
+    border-color: #edf2f7;
+    box-shadow: none;
 }
 
 .psp-footer {

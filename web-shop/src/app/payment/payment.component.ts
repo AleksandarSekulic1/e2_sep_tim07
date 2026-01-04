@@ -15,10 +15,10 @@ export class PaymentComponent {
   // Podaci za inicijalizaciju (Tabela 1 iz specifikacije)
   transaction: any = {
     amount: 5000,            // Podrazumevana vrednost
-    currency: 'RSD',        
+    currency: 'RSD',
     merchantId: '12345',     // Mora se poklapati sa onim u bazi (ako proveravaš)
-    merchantPassword: 'password', 
-    merchantOrderId: '',     
+    merchantPassword: 'password',
+    merchantOrderId: '',
     merchantTimestamp: '',
     successUrl: 'http://localhost:4200/success',
     failedUrl: 'http://localhost:4200/failed',
@@ -40,8 +40,8 @@ export class PaymentComponent {
     }
 
     // 2. Popunjavanje sistemskih podataka
-    this.transaction.merchantOrderId = Math.floor(Math.random() * 1000000).toString(); 
-    this.transaction.merchantTimestamp = new Date().toISOString(); 
+    this.transaction.merchantOrderId = Math.floor(Math.random() * 1000000).toString();
+    this.transaction.merchantTimestamp = new Date().toISOString();
 
     console.log('Šaljem zahtev ka Core servisu...', this.transaction);
 
@@ -50,15 +50,15 @@ export class PaymentComponent {
       next: (response: any) => {
         console.log('Uspeh:', response);
         this.isError = false;
-        
+
         if (response.paymentUrl) {
            // --- IZMENA: Šaljemo i successUrl i failedUrl kroz link ---
            // Koristimo encodeURIComponent da specijalni znaci (://) ne pokvare link
            const sUrl = encodeURIComponent(this.transaction.successUrl);
            const fUrl = encodeURIComponent(this.transaction.failedUrl);
 
-           const finalUrl = `${response.paymentUrl}?amount=${this.transaction.amount}&successUrl=${sUrl}&failedUrl=${fUrl}`;
-           
+           const finalUrl = `${response.paymentUrl}?amount=${this.transaction.amount}&currency=${this.transaction.currency}&successUrl=${sUrl}&failedUrl=${fUrl}`;
+
            console.log("Preusmeravam na:", finalUrl);
            window.location.href = finalUrl;
         }

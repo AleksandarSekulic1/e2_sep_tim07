@@ -1,0 +1,68 @@
+<div class="crypto-container">
+  <h1>Ethereum (Sepolia) uplata</h1>
+
+  <div class="status-box" [ngClass]="status">
+    <p class="status-message">{{ message }}</p>
+    <p *ngIf="confirmations > 0">Potvrde: {{ confirmations }}/2</p>
+  </div>
+
+  <!-- MetaMask Payment Option (Only for ETH) -->
+  <div class="metamask-section">
+    <div *ngIf="hasMetaMask" class="metamask-available">
+      <h2>💰 Brzo plaćanje sa MetaMask</h2>
+      <p *ngIf="!metaMaskConnected">Platite direktno iz pretraživača!</p>
+
+      <button
+        *ngIf="!metaMaskConnected"
+        class="btn-metamask"
+        (click)="connectMetaMask()">
+        🦊 Poveži MetaMask
+      </button>
+
+      <div *ngIf="metaMaskConnected" class="metamask-connected">
+        <p>✅ Povezan: {{ metaMaskAddress.substring(0, 6) }}...{{ metaMaskAddress.substring(38) }}</p>
+        <button
+          class="btn-pay-metamask"
+          (click)="payWithMetaMask()"
+          [disabled]="sendingWithMetaMask">
+          {{ sendingWithMetaMask ? '⏳ Šaljem...' : '💸 Plati ' + amountCrypto + ' ETH' }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!hasMetaMask" class="metamask-install">
+      <p>⚠️ MetaMask nije instaliran</p>
+      <a href="https://metamask.io/download/" target="_blank" class="btn-install-metamask">
+        📥 Instaliraj MetaMask
+      </a>
+    </div>
+
+    <div class="divider">
+      <span>ILI</span>
+    </div>
+  </div>
+
+  <!-- Manual Payment (QR Code) -->
+  <div class="manual-payment">
+    <p>Pošaljite tačno: <strong>{{ amountCrypto }} ETH</strong></p>
+    <p>Fiat referenca: {{ fiat }}</p>
+    <p>Adresa za uplatu:</p>
+    <code class="address-box">{{ address }}</code>
+  </div>
+
+  <div class="explorer-link">
+    <a [href]="getExplorerUrl()" target="_blank">🔍 Proveri na Blockchain Explorer</a>
+  </div>
+
+  <div class="note">
+    <p><strong>Kako platiti:</strong></p>
+    <ol>
+      <li><strong>Sa MetaMask:</strong> Kliknite "Poveži MetaMask" i platite direktno</li>
+      <li><strong>Ručno:</strong> Nabavite Sepolia ETH sa <a href="https://sepoliafaucet.com/" target="_blank">sepoliafaucet.com</a></li>
+      <li>Kopirajte adresu</li>
+      <li>Pošaljite tačan ETH iznos</li>
+      <li>Potvrda za ~12 sekundi! ⚡</li>
+    </ol>
+    <p class="warning">Napomena: Ovo je testnet demo. Za produkciju čuvajte ključeve bezbedno.</p>
+  </div>
+</div>

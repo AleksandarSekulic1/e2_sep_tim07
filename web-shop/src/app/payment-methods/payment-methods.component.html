@@ -23,17 +23,19 @@
                 <span class="badge ips">IPS Standard</span>
             </div>
 
-            <div class="method-card active" (click)="choosePayPal()">
+            <div class="method-card" [class.active]="currency !== 'RSD'" [class.disabled]="currency === 'RSD'" (click)="choosePayPal()">
                 <div class="icon-wrapper">🅿️</div>
                 <h3>PayPal</h3>
-                <p>Brzo i sigurno plaćanje</p>
+                <p *ngIf="currency !== 'RSD'">Brzo i sigurno plaćanje</p>
+                <p *ngIf="currency === 'RSD'" class="disabled-text">Ne podržava RSD</p>
                 <span class="badge paypal">PayPal</span>
             </div>
 
-            <div class="method-card disabled">
-                <div class="icon-wrapper">₿</div>
+            <div class="method-card active" (click)="chooseCrypto()">
+                <div class="icon-wrapper">E</div>
                 <h3>Kriptovaluta</h3>
-                <p>Uskoro dostupno</p>
+                <p>Ethereum (Sepolia)</p>
+                <span class="badge">ETH</span>
             </div>
         </div>
 
