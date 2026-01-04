@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router'; // Dodali smo Router
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -11,14 +11,18 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './bank-payment.component.html',
   styleUrls: ['./bank-payment.component.css']
 })
-export class BankPaymentComponent implements OnInit {
+export class BankPaymentComponent implements OnInit, OnDestroy {
 
   paymentId: string = '';
   cardType: string = '';
   successUrl: string = '';
   failedUrl: string = '';
   
-  // Podaci koje korisnik unosi
+  timeLeft: string = '15:00';
+  isExpired: boolean = false;
+  isExpiringSoon: boolean = false;
+  private timerInterval: any;
+
   cardData = {
     pan: '',
     cardHolder: '',
@@ -30,87 +34,115 @@ export class BankPaymentComponent implements OnInit {
 
   message = '';
   isSuccess = false;
-  isProcessing = false; // <--- NOVO: Sprečava duple klikove
+  isProcessing = false;
 
   constructor(
     private route: ActivatedRoute, 
     private http: HttpClient,
-    private router: Router // Injektovan ruter
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.paymentId = this.route.snapshot.paramMap.get('paymentId') || '';
-
-    // Hvatamo parametre iz URL-a
     const amountParam = this.route.snapshot.queryParamMap.get('amount');
     if (amountParam) this.cardData.amount = Number(amountParam);
 
     const orderIdParam = this.route.snapshot.queryParamMap.get('merchantOrderId');
-    if (orderIdParam) {
-        this.cardData.merchantOrderId = orderIdParam;
+    if (orderIdParam) this.cardData.merchantOrderId = orderIdParam;
+
+    const expiresAtParam = this.route.snapshot.queryParamMap.get('expiresAt');
+    if (expiresAtParam) {
+      this.startTimer(new Date(expiresAtParam));
     }
 
-    // Čuvamo URL-ove za povratak na WebShop
     this.successUrl = this.route.snapshot.queryParamMap.get('successUrl') || '';
     this.failedUrl = this.route.snapshot.queryParamMap.get('failedUrl') || '';
   }
 
+  ngOnDestroy() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+  }
+
+  startTimer(expiryDate: Date) {
+    this.timerInterval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = expiryDate.getTime() - now;
+
+      if (distance < 0) {
+        clearInterval(this.timerInterval);
+        this.isExpired = true;
+        this.timeLeft = '00:00';
+        this.message = "❌ Sesija je istekla!";
+        return;
+      }
+
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      this.timeLeft = `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+      this.isExpiringSoon = minutes < 2;
+    }, 1000);
+  }
+
   submitPayment() {
-    if (this.isProcessing) return; // Blokiraj ako je već u toku
+    if (this.isProcessing || this.isExpired) return;
+
+    // --- KLJUČNA ISPRAVKA: Čišćenje PAN-a pre slanja ---
+    // Ovo osigurava da backend dobije samo cifre, što je neophodno za LuhnCheck
+    const cleanData = {
+      ...this.cardData,
+      pan: this.cardData.pan.replace(/\D/g, '') // Briše sve što nije broj
+    };
 
     this.isProcessing = true;
     this.message = "⏳ Obrada transakcije...";
 
-    console.log("Šaljem podatke Banci...", this.cardData);
-
-    // Šaljemo podatke na Bank service
-    this.http.post('http://localhost:8080/bank/api/bank/pay', this.cardData)
+    this.http.post('http://localhost:8080/bank/api/bank/pay', cleanData)
       .subscribe({
         next: (res: any) => {
           this.isSuccess = true;
-          this.message = "✅ PLAĆANJE USPEŠNO! Preusmeravanje na WebShop...";
+          this.message = "✅ PLAĆANJE USPEŠNO! Preusmeravanje...";
+          if (this.timerInterval) clearInterval(this.timerInterval);
           
-          // Sačekaj 3 sekunde da korisnik vidi poruku, pa redirekcija
           setTimeout(() => {
              if (this.successUrl) {
                window.location.href = decodeURIComponent(this.successUrl);
              } else {
-               // Fallback ako WebShop nije poslao URL
                this.router.navigate(['/transactions']);
              }
           }, 3000);
         },
         error: (err) => {
           this.isSuccess = false;
-          this.isProcessing = false; // Dozvoli ponovni pokušaj na ovoj formi ako je banka vratila grešku
+          this.isProcessing = false;
+          // err.error bi trebao da sadrži "Neispravan broj kartice" ako Luhn ne prođe
+          this.message = "❌ ODBIJENO: " + (err.error || "Sistemska greška");
           
-          // Prikaz greške (npr. INVALID_CVV, CARD_EXPIRED)
-          this.message = "❌ PLAĆANJE ODBIJENO: " + (err.error || "Sistemska greška");
-          
-          // Opciono: Redirekcija na failedUrl nakon 3 sekunde
           setTimeout(() => {
-            if (this.failedUrl) {
+            if (this.failedUrl && !this.isProcessing) {
               window.location.href = decodeURIComponent(this.failedUrl);
             }
-          }, 3000);
+          }, 5000); // Produženo na 5s da korisnik vidi razlog (npr. LUHN_FAILED)
         }
       });
   }
 
   detectCardType() {
-    const pan = this.cardData.pan ? this.cardData.pan.replace(/\s+/g, '') : '';
+    // Čistimo PAN samo za potrebe detekcije vizuelnog tipa
+    const pan = this.cardData.pan ? this.cardData.pan.replace(/\D/g, '') : '';
+    
     if (!pan) {
       this.cardType = '';
       return;
     }
 
-    // Dinamički logo (Tačka 4.a)
     if (pan.startsWith('4')) {
       this.cardType = 'visa';
     } else if (pan.startsWith('5') || pan.startsWith('2')) {
       this.cardType = 'mastercard';
+    } else if (pan.startsWith('9')) {
+      this.cardType = 'dina';
     } else {
       this.cardType = '';
     }
-  }   
+  } 
 }

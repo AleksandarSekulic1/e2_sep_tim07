@@ -1,27 +1,43 @@
-<div class="psp-container">
-    <h2>Izaberite način plaćanja</h2>
-    <p>Transakcija ID: <strong>{{ transactionId }}</strong></p>
-    
-    <div class="methods-grid">
-        <div class="method-card" (click)="chooseCard()">
-            <div class="icon">💳</div>
-            <h3>Platna Kartica</h3>
-            <p>Visa, MasterCard, Dina</p>
+<div class="psp-outer-wrapper">
+    <div class="psp-container">
+        <div class="psp-header">
+            <h2>Izaberite način plaćanja</h2>
+            <div class="transaction-info">
+                <span>Transakcija ID:</span>
+                <strong>#{{ transactionId }}</strong>
+            </div>
         </div>
+        
+        <div class="methods-grid">
+            <div class="method-card active" (click)="chooseCard()">
+                <div class="icon-wrapper">💳</div>
+                <h3>Platna Kartica</h3>
+                <p>Visa, MasterCard, DinaCard</p>
+                <span class="badge">Preporučeno</span>
+            </div>
 
-        <div class="method-card" (click)="chooseQR()"> <div class="icon">📱</div>
-            <h3>IPS QR Kod</h3>
-            <p>Skeniraj i plati</p>
+            <div class="method-card active" (click)="chooseQR()">
+                <div class="icon-wrapper">📱</div>
+                <h3>IPS QR Kod</h3>
+                <p>Skeniraj i plati (NBS IPS)</p>
+                <span class="badge ips">IPS Standard</span>
+            </div>
+
+            <div class="method-card disabled">
+                <div class="icon-wrapper">🅿️</div>
+                <h3>PayPal</h3>
+                <p>Uskoro dostupno</p>
+            </div>
+
+            <div class="method-card disabled">
+                <div class="icon-wrapper">₿</div>
+                <h3>Kriptovaluta</h3>
+                <p>Uskoro dostupno</p>
+            </div>
         </div>
-
-        <div class="method-card disabled">
-            <div class="icon">🅿️</div>
-            <h3>PayPal</h3>
-        </div>
-
-        <div class="method-card disabled">
-            <div class="icon">₿</div>
-            <h3>Kriptovaluta</h3>
+        
+        <div class="psp-footer">
+            <p>🔒 Sigurna komunikacija sa bankom je aktivna</p>
         </div>
     </div>
 </div>

@@ -14,7 +14,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.POST
 import retrofit2.http.Path
+import java.util.*
 
+// API interfejs za komunikaciju sa tvojim Core/Bank servisom
 interface PspApiService {
     @POST("api/qr/simulate-pay/{id}")
     fun confirmPayment(@Path("id") transactionId: String): Call<Void>
@@ -23,7 +25,8 @@ interface PspApiService {
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val BASE_URL = "http://192.168.0.114:8081/"
+    // OBAVEZNO: Proveri port (8080 za Gateway, 8081 za Core ili 8085 za Bank)
+    private val BASE_URL = "http://192.168.0.114:8080/core/"
     private val TAG = "MobileBankDebug"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     private fun pokreniSkener() {
         val options = ScanOptions()
         options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-        options.setPrompt("Skenirajte IPS QR kod")
+        options.setPrompt("Skenirajte NBS IPS QR kod")
         options.setBeepEnabled(true)
         options.setOrientationLocked(true)
         barcodeLauncher.launch(options)
@@ -47,18 +50,22 @@ class MainActivity : AppCompatActivity() {
 
     private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents == null) {
-            Log.d(TAG, "Skeniranje otkazano od strane korisnika")
+            Log.d(TAG, "Skeniranje otkazano")
         } else {
             val scannedData = result.contents
             Log.d(TAG, "Skeniran IPS String: $scannedData")
 
-            // Uzimamo ID koji je na samom kraju stringa (posle poslednjeg razmaka)
-            val transactionId = scannedData.substringAfterLast(" ").trim()
+            // --- KLJUČNA ISPRAVKA: Izvlačenje ID-a iz NBS formata ---
+            // NBS format: ...|RO:134
+            val transactionId = if (scannedData.contains("RO:")) {
+                scannedData.substringAfter("RO:").trim()
+            } else {
+                scannedData // Fallback ako skeniraš čist ID
+            }
 
             Log.d(TAG, "Izvučen ID za slanje: $transactionId")
-            Log.d(TAG, "Kompletan URL: ${BASE_URL}api/qr/simulate-pay/$transactionId")
-
             binding.tvStatus.text = "Slanje potvrde za ID: $transactionId"
+
             posaljiPotvrduBackendu(transactionId)
         }
     }
@@ -74,18 +81,23 @@ class MainActivity : AppCompatActivity() {
         apiService.confirmPayment(id).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 Log.d(TAG, "Server odgovor: ${response.code()}")
+
                 if (response.isSuccessful) {
-                    binding.tvStatus.text = "✅ USPEŠNO!"
-                    Toast.makeText(this@MainActivity, "Plaćeno!", Toast.LENGTH_SHORT).show()
+                    // Scenario: Iznos < 20.000 RSD
+                    binding.tvStatus.text = "✅ USPEŠNO PLAĆENO!"
+                    Toast.makeText(this@MainActivity, "Transakcija $id uspešna!", Toast.LENGTH_LONG).show()
                 } else {
-                    binding.tvStatus.text = "❌ Greška: ${response.code()}"
-                    Log.e(TAG, "Greška 404 znači da ID $id ne postoji u bazi na portu 8081")
+                    // Scenario: Iznos > 20.000 RSD (Vraća 400 Bad Request)
+                    val errorMsg = if (response.code() == 400) "Limit prekoračen!" else "ID nije pronađen!"
+                    binding.tvStatus.text = "❌ ODBIJENO: $errorMsg"
+                    Log.e(TAG, "Greška servera: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
+                // Scenario: Server nije dostupan ili loš IP
                 Log.e(TAG, "Mrežna greška: ${t.message}")
-                binding.tvStatus.text = "❌ Mreža: ${t.message}"
+                binding.tvStatus.text = "❌ MREŽA: Proverite IP adresu i WiFi"
             }
         })
     }
