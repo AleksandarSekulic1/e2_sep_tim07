@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./transaction-list.component.css']
 })
 export class TransactionListComponent implements OnInit, OnDestroy {
-  
+
   transactions: any[] = [];
   filteredTransactions: any[] = [];
   searchText: string = '';
@@ -38,15 +38,15 @@ export class TransactionListComponent implements OnInit, OnDestroy {
 
   loadTransactions() {
     const timestamp = new Date().getTime();
-    this.http.get<any[]>(`http://localhost:8080/core/transactions?t=${timestamp}`)
+    this.http.get<any[]>(`http://localhost:8084/core/transactions?t=${timestamp}`)
       .subscribe({
         next: (data) => {
           const sortedData = data.sort((a, b) => b.id - a.id);
-          
+
           // --- DODATO ZA DEBAGOVANJE ---
           // Ovo će ti u konzoli ispisati tabelu. Klikni na strelicu pored objekta da vidiš polja.
           console.log('--- NOVI PODACI SA SERVERA ---');
-          console.table(sortedData); 
+          console.table(sortedData);
           // -----------------------------
 
           if (this.isModalOpen && this.selectedTransaction) {
@@ -65,7 +65,7 @@ export class TransactionListComponent implements OnInit, OnDestroy {
 
   filterData() {
     const term = this.searchText.toLowerCase();
-    this.filteredTransactions = this.transactions.filter(t => 
+    this.filteredTransactions = this.transactions.filter(t =>
       t.id?.toString().includes(term) ||
       t.merchantOrderId?.toLowerCase().includes(term) ||
       t.amount?.toString().includes(term) ||

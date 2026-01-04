@@ -15,8 +15,8 @@ public class CardService {
     @Autowired
     private RestTemplate restTemplate;
 
-    private final String BANK_SERVICE_URL = "http://localhost:8085/api/bank/request-payment-url";
-    private final String CORE_SERVICE_UPDATE_URL = "http://localhost:8081/transactions/update-method/";
+    private final String BANK_SERVICE_URL = "http://bank-service:8080/api/bank/request-payment-url";
+    private final String CORE_SERVICE_UPDATE_URL = "http://core-service:8080/transactions/update-method/";
 
     public void updateTransactionMethod(Long pspTransactionId) {
         try {

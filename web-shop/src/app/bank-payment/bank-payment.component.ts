@@ -17,7 +17,7 @@ export class BankPaymentComponent implements OnInit, OnDestroy {
   cardType: string = '';
   successUrl: string = '';
   failedUrl: string = '';
-  
+
   timeLeft: string = '15:00';
   isExpired: boolean = false;
   isExpiringSoon: boolean = false;
@@ -37,7 +37,7 @@ export class BankPaymentComponent implements OnInit, OnDestroy {
   isProcessing = false;
 
   constructor(
-    private route: ActivatedRoute, 
+    private route: ActivatedRoute,
     private http: HttpClient,
     private router: Router
   ) {}
@@ -96,13 +96,13 @@ export class BankPaymentComponent implements OnInit, OnDestroy {
     this.isProcessing = true;
     this.message = "⏳ Obrada transakcije...";
 
-    this.http.post('http://localhost:8080/bank/api/bank/pay', cleanData)
+    this.http.post('http://localhost:8084/bank/api/bank/pay', cleanData)
       .subscribe({
         next: (res: any) => {
           this.isSuccess = true;
           this.message = "✅ PLAĆANJE USPEŠNO! Preusmeravanje...";
           if (this.timerInterval) clearInterval(this.timerInterval);
-          
+
           setTimeout(() => {
              if (this.successUrl) {
                window.location.href = decodeURIComponent(this.successUrl);
@@ -116,7 +116,7 @@ export class BankPaymentComponent implements OnInit, OnDestroy {
           this.isProcessing = false;
           // err.error bi trebao da sadrži "Neispravan broj kartice" ako Luhn ne prođe
           this.message = "❌ ODBIJENO: " + (err.error || "Sistemska greška");
-          
+
           setTimeout(() => {
             if (this.failedUrl && !this.isProcessing) {
               window.location.href = decodeURIComponent(this.failedUrl);
@@ -129,7 +129,7 @@ export class BankPaymentComponent implements OnInit, OnDestroy {
   detectCardType() {
     // Čistimo PAN samo za potrebe detekcije vizuelnog tipa
     const pan = this.cardData.pan ? this.cardData.pan.replace(/\D/g, '') : '';
-    
+
     if (!pan) {
       this.cardType = '';
       return;
@@ -144,5 +144,5 @@ export class BankPaymentComponent implements OnInit, OnDestroy {
     } else {
       this.cardType = '';
     }
-  } 
+  }
 }

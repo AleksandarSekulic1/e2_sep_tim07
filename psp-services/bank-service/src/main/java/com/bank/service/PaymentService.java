@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,7 +26,7 @@ public class PaymentService {
         }
 
         String paymentId = UUID.randomUUID().toString();
-        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(15);
+        Instant expiryTime = Instant.now().plus(15, ChronoUnit.MINUTES);
 
         String paymentUrl = "http://localhost:4200/bank-payment/" + paymentId + 
                             "?amount=" + request.getAmount() + 
@@ -57,7 +59,7 @@ public class PaymentService {
 
     public void notifyPsp(String merchantOrderId, String status, String globalId, String reason) {
         try {
-            String coreUrl = "http://localhost:8081/transactions/update-status/" + merchantOrderId;
+            String coreUrl = "http://core-service:8080/transactions/update-status/" + merchantOrderId;
             Map<String, Object> statusUpdate = new HashMap<>();
             statusUpdate.put("status", status);
             statusUpdate.put("reason", reason); // Ovaj razlog će se sada tačno videti u istoriji

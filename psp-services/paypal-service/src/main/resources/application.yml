@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8080
 
 spring:
   application:
@@ -7,6 +7,4 @@ spring:
   
   data:
     mongodb:
-      # Povezivanje na MongoDB kontejner (port 27017)
-      # uri: mongodb://username:password@host:port/database?authSource=admin
-      uri: mongodb://admin:super@localhost:27017/psp_paypal_db?authSource=admin
+      uri: mongodb://admin:super@paypal-mongo-db:27017/psp_paypal_db?authSource=admin

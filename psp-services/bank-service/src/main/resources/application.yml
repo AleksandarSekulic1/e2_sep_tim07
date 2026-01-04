@@ -1,13 +1,12 @@
 server:
-  port: 8085            # Banka radi na 8085 (da se ne sudara sa core-om na 8081)
+  port: 8080
 
 spring:
   application:
     name: bank-service
   
   datasource:
-    # Koristimo isti server (localhost:5444) ali NOVU bazu 'psp_bank_db'
-    url: jdbc:postgresql://localhost:5445/psp_bank_db
+    url: jdbc:postgresql://bank-db:5432/psp_bank_db
     username: postgres
     password: super
   

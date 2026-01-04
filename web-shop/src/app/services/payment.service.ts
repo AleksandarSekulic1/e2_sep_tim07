@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class PaymentService {
 
   // API Gateway
-  private readonly GATEWAY_URL = 'http://localhost:8080';
+  private readonly GATEWAY_URL = 'http://localhost:8084';
 
   constructor(private http: HttpClient) { }
 

@@ -27,23 +27,31 @@ spring:
       routes:
         # Rute za CORE servis (uključuje transakcije i QR kod)
         - id: core-service
-          uri: http://localhost:8081
+          uri: http://core-service:8080
           predicates:
             - Path=/core/**, /transactions/**, /api/qr/**
           filters:
-            - StripPrefix=1 # Ako Angular šalje /core/transactions, skida "core" i gađa direktno /transactions na 8081
+            - StripPrefix=1 # Ako Angular šalje /core/transactions, skida "core" i gađa direktno /transactions na 8080
 
         # Rute za BANK servis
         - id: bank-service
-          uri: http://localhost:8082
+          uri: http://bank-service:8080
           predicates:
             - Path=/bank/**
           filters:
             - StripPrefix=1
 
+        # Rute za CARD servis
+        - id: card-service
+          uri: http://card-service:8080
+          predicates:
+            - Path=/card/**
+          filters:
+            - StripPrefix=1
+
         # Rute za PAYPAL servis
         - id: paypal-service
-          uri: http://localhost:8083 # Proveri port svog PayPal servisa
+          uri: http://paypal-service:8080
           predicates:
             - Path=/paypal/**
           filters:

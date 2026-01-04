@@ -1,14 +1,13 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
   application:
     name: psp-core-service
   
   datasource:
-    # Povezujemo se na localhost:5432 jer pokrećeš Java aplikaciju lokalno,
-    # a Docker je mapirao port 5432 kontejnera na 5432 tvog računara.
-    url: jdbc:postgresql://localhost:5444/psp_core_db
+    # Using Docker service name for database connection within the container
+    url: jdbc:postgresql://psp-core-db:5432/psp_core_db
     username: postgres
     password: super
   

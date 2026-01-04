@@ -1,13 +1,12 @@
 server:
-  port: 8082
+  port: 8080
 
 spring:
   application:
     name: psp-card-service
   
   datasource:
-    # Card baza je na portu 5433 (iz docker-compose)
-    url: jdbc:postgresql://localhost:5433/psp_card_db
+    url: jdbc:postgresql://psp-card-db:5432/psp_card_db
     username: postgres
     password: super
   

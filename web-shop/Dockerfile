@@ -26,7 +26,7 @@ RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/
 
 # Copy built application from builder stage
-COPY --from=builder /build/dist/web-shop /usr/share/nginx/html
+COPY --from=builder /build/dist/web-shop/browser /usr/share/nginx/html
 
 # Expose port
 EXPOSE 80

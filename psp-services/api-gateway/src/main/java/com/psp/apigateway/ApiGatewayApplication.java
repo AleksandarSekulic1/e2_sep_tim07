@@ -18,6 +18,8 @@ public class ApiGatewayApplication {
     }
 
     // 1. DEFINISANJE RUTA (Rutiranje ka mikroservisima)
+    // Routes are defined in application.yml
+    /*
     @Bean
     public RouteLocator myRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -44,6 +46,7 @@ public class ApiGatewayApplication {
                 
             .build();
     }
+    */
 
     // 2. CORS KONFIGURACIJA (Dozvola za Angular)
     @Bean

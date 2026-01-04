@@ -19,18 +19,18 @@ export class QRPaymentComponent implements OnInit, OnDestroy {
   pollingInterval: any;
 
   // Koristimo port 8080 jer tvoj API Gateway upravlja CORS-om i rutiranjem
-  private baseUrl = 'http://localhost:8080/core';
+  private baseUrl = 'http://localhost:8084/core';
 
   constructor(
-    private route: ActivatedRoute, 
-    private http: HttpClient, 
+    private route: ActivatedRoute,
+    private http: HttpClient,
     private router: Router
   ) {}
 
   ngOnInit() {
     this.transactionId = this.route.snapshot.paramMap.get('id') || '';
     this.amount = Number(this.route.snapshot.queryParamMap.get('amount') || 0);
-    
+
     // Inicijalno generisanje koda uz proveru limita na backend-u
     this.loadQRCode();
   }
@@ -39,7 +39,7 @@ export class QRPaymentComponent implements OnInit, OnDestroy {
     this.http.get(`${this.baseUrl}/api/qr/generate/${this.transactionId}`).subscribe({
       next: (res: any) => {
         this.qrCodeBase64 = res.qrCode;
-        this.ipsString = res.ipsString; 
+        this.ipsString = res.ipsString;
         this.startPolling();
       },
       error: (err) => {
@@ -60,10 +60,10 @@ export class QRPaymentComponent implements OnInit, OnDestroy {
       // Prikazuje "Plaćanje Neuspešno" vizuelno (kao na tvojoj slici)
       this.message = "❌ Plaćanje odbijeno (Limit 20.000 RSD ili greška)";
       this.qrCodeBase64 = ''; // Skloni QR kod da se vidi greška
-      
+
       // Vraća na početnu formu nakon 3 sekunde
       setTimeout(() => {
-        this.router.navigate(['/payment-selection']); 
+        this.router.navigate(['/payment-selection']);
       }, 3000);
     }
   });
@@ -74,16 +74,16 @@ export class QRPaymentComponent implements OnInit, OnDestroy {
     this.http.get(`${this.baseUrl}/transactions/${this.transactionId}`).subscribe({
       next: (res: any) => {
         // SCENARIO 1: Uspešno plaćanje
-        if (res.status === 'PAID') { 
+        if (res.status === 'PAID') {
           this.stopPolling();
           this.message = "✅ Plaćanje uspešno!";
           setTimeout(() => this.router.navigate(['/success']), 2000);
-        } 
+        }
         // SCENARIO 2: Odbijeno plaćanje (npr. limit 20k)
         else if (res.status === 'FAILED') {
           this.stopPolling();
           this.message = "❌ Plaćanje odbijeno: " + (res.reason || "Limit prekoračen");
-          
+
           // Sačekaj 3 sekunde da asistent vidi poruku, pa vrati na početak
           setTimeout(() => {
             this.router.navigate(['/failed']);
