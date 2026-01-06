@@ -1,0 +1,51 @@
+<div class="subscription-container">
+  <h2>Merchant Subscription (PSP)</h2>
+  <div *ngIf="registeredMerchant" class="info-box">
+    <p><strong>Merchant ID:</strong> {{ registeredMerchant.merchantId }}</p>
+    <p><strong>API Key (Password):</strong> {{ registeredMerchant.merchantPassword }}</p>
+    <p>Use these credentials in your Web Shop configuration.</p>
+  </div>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Web Shop Name:</label>
+      <input type="text" id="name" [(ngModel)]="merchantName" name="merchantName" required [disabled]="!!registeredMerchant">
+    </div>
+
+    <h3>Select Payment Services</h3>
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" [(ngModel)]="bankEnabled" name="bankEnabled">
+        Bank Payment (Cards, QR)
+      </label>
+      <label>
+        <input type="checkbox" [(ngModel)]="paypalEnabled" name="paypalEnabled">
+        PayPal
+      </label>
+      <label>
+        <input type="checkbox" [(ngModel)]="cryptoEnabled" name="cryptoEnabled">
+        Cryptocurrency
+      </label>
+    </div>
+
+    <h3>Callback URLs</h3>
+    <div class="form-group">
+      <label for="successUrl">SUCCESS_URL</label>
+      <input id="successUrl" name="successUrl" [(ngModel)]="successUrl" type="url" required>
+    </div>
+    <div class="form-group">
+      <label for="failedUrl">FAILED_URL</label>
+      <input id="failedUrl" name="failedUrl" [(ngModel)]="failedUrl" type="url" required>
+    </div>
+    <div class="form-group">
+      <label for="errorUrl">ERROR_URL</label>
+      <input id="errorUrl" name="errorUrl" [(ngModel)]="errorUrl" type="url" required>
+    </div>
+
+    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+    <button type="submit" class="btn-primary">
+      {{ registeredMerchant ? 'Update Subscription' : 'Register Web Shop' }}
+    </button>
+  </form>
+</div>

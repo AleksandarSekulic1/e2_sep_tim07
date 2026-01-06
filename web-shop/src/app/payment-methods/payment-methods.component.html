@@ -8,22 +8,22 @@
             </div>
         </div>
 
-        <div class="methods-grid">
-            <div class="method-card active" (click)="chooseCard()">
+        <div class="methods-grid" *ngIf="!loading">
+            <div class="method-card active" *ngIf="bankAllowed" (click)="chooseCard()">
                 <div class="icon-wrapper">💳</div>
                 <h3>Platna Kartica</h3>
                 <p>Visa, MasterCard, DinaCard</p>
                 <span class="badge">Preporučeno</span>
             </div>
 
-            <div class="method-card active" (click)="chooseQR()">
+            <div class="method-card active" *ngIf="bankAllowed" (click)="chooseQR()">
                 <div class="icon-wrapper">📱</div>
                 <h3>IPS QR Kod</h3>
                 <p>Skeniraj i plati (NBS IPS)</p>
                 <span class="badge ips">IPS Standard</span>
             </div>
 
-            <div class="method-card" [class.active]="currency !== 'RSD'" [class.disabled]="currency === 'RSD'" (click)="choosePayPal()">
+            <div class="method-card" *ngIf="paypalAllowed" [class.active]="currency !== 'RSD'" [class.disabled]="currency === 'RSD'" (click)="choosePayPal()">
                 <div class="icon-wrapper">🅿️</div>
                 <h3>PayPal</h3>
                 <p *ngIf="currency !== 'RSD'">Brzo i sigurno plaćanje</p>
@@ -31,13 +31,14 @@
                 <span class="badge paypal">PayPal</span>
             </div>
 
-            <div class="method-card active" (click)="chooseCrypto()">
+            <div class="method-card active" *ngIf="cryptoAllowed" (click)="chooseCrypto()">
                 <div class="icon-wrapper">E</div>
                 <h3>Kriptovaluta</h3>
                 <p>Ethereum (Sepolia)</p>
                 <span class="badge">ETH</span>
             </div>
         </div>
+        <div *ngIf="loading">Loading payment options...</div>
 
         <div class="psp-footer">
             <p>🔒 Sigurna komunikacija sa bankom je aktivna</p>
