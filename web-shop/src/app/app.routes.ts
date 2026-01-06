@@ -8,10 +8,12 @@ import { FailedComponent } from './failed/failed.component';
 import { QRPaymentComponent } from './qr-payment/qr-payment.component'; // <--- IMPORTUJ OVO
 import { PaypalPaymentComponent } from './paypal-payment/paypal-payment.component'; // <--- IMPORT PayPal
 import { CryptoPaymentComponent } from './crypto-payment/crypto-payment.component';
+import { MerchantSubscriptionComponent } from './merchant-subscription/merchant-subscription.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'payment', pathMatch: 'full' }, // Početna strana vodi na plaćanje
   { path: 'payment', component: PaymentComponent },
+  { path: 'merchant-subscription', component: MerchantSubscriptionComponent }, // <--- Admin/Setup page
   { path: 'payment-methods/:id', component: PaymentMethodsComponent },
   { path: 'bank-payment/:paymentId', component: BankPaymentComponent },
   { path: 'transactions', component: TransactionListComponent },

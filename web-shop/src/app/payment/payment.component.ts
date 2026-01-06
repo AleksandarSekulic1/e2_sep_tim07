@@ -16,8 +16,8 @@ export class PaymentComponent {
   transaction: any = {
     amount: 5000,            // Podrazumevana vrednost
     currency: 'RSD',
-    merchantId: '12345',     // Mora se poklapati sa onim u bazi (ako proveravaš)
-    merchantPassword: 'password',
+    merchantId: '',          // Učitavamo iz LocalStorage
+    merchantPassword: '',
     merchantOrderId: '',
     merchantTimestamp: '',
     successUrl: 'http://localhost:4200/success',
@@ -29,7 +29,13 @@ export class PaymentComponent {
   isError = false;
 
   // Ubacujemo servis u konstruktor
-  constructor(private paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService) {
+    // Pokušaj učitavanja iz LocalStorage (simulacija konfiguracije prodavnice nakon pretplate)
+    const storedId = localStorage.getItem('merchantId');
+    const storedPass = localStorage.getItem('merchantPassword');
+    this.transaction.merchantId = storedId || '12345'; // Fallback na test ID
+    this.transaction.merchantPassword = storedPass || 'password';
+  }
 
   initiatePayment() {
     // 1. Validacija

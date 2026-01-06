@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { PaymentService } from '../services/payment.service';
+import { HttpClient } from '@angular/common/http';
+import { PspService, Merchant } from '../services/psp.service';
 
 @Component({
   selector: 'app-payment-methods',
@@ -18,26 +20,62 @@ export class PaymentMethodsComponent implements OnInit {
   successUrl: string = '';
   failedUrl: string = '';
 
+  // Subscription-based flags
+  bankAllowed: boolean = true;
+  paypalAllowed: boolean = true;
+  cryptoAllowed: boolean = true;
+  loading: boolean = true;
+
   constructor(
     private route: ActivatedRoute,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private http: HttpClient,
+    private pspService: PspService
   ) {}
 
   ngOnInit() {
     this.transactionId = this.route.snapshot.paramMap.get('id') || '';
+    
+    // Fetch Transaction details to check Merchant config
+    if (this.transactionId) {
+       this.http.get<any>(`http://localhost:8084/core/transactions/${this.transactionId}`).subscribe({
+         next: (tx) => {
+           this.amount = tx.amount;
+           this.currency = tx.currency;
+           // Fetch merchant allowed methods + URLs without exposing password
+           this.pspService.getAllowedMethods(tx.merchantId).subscribe({
+             next: (methodsResponse: any) => {
+               this.filterMethods(methodsResponse);
+               this.successUrl = methodsResponse.successUrl || this.successUrl;
+               this.failedUrl = methodsResponse.failedUrl || this.failedUrl;
+               this.loading = false;
+             },
+             error: () => this.loading = false
+           });
+         },
+         error: (err) => {
+           console.error("Failed to load tx", err);
+           this.loading = false;
+         }
+       });
+    }
 
-    // Hvatamo iznos
+    // Capture query params just in case (fallback)
     const amountParam = this.route.snapshot.queryParamMap.get('amount');
-    this.amount = amountParam ? Number(amountParam) : 5000;
+    if (amountParam) this.amount = Number(amountParam);
 
-    // Hvatamo valutu
-    this.currency = this.route.snapshot.queryParamMap.get('currency') || 'RSD';
-
-    // --- IZMENA: Hvatamo URL-ove za povratak ---
+    this.currency = this.route.snapshot.queryParamMap.get('currency') || this.currency;
     this.successUrl = this.route.snapshot.queryParamMap.get('successUrl') || 'http://localhost:4200/success';
     this.failedUrl = this.route.snapshot.queryParamMap.get('failedUrl') || 'http://localhost:4200/failed';
 
     console.log("PSP Podaci:", { id: this.transactionId, amount: this.amount, currency: this.currency, success: this.successUrl });
+  }
+
+  filterMethods(merchant: Merchant | any) {
+    if (!merchant.paymentMethods) return;
+    this.bankAllowed = merchant.paymentMethods.includes('BANK');
+    this.paypalAllowed = merchant.paymentMethods.includes('PAYPAL');
+    this.cryptoAllowed = merchant.paymentMethods.includes('CRYPTO');
   }
 
   chooseCard() {
