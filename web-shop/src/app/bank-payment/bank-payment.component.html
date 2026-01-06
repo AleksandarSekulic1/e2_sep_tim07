@@ -1,7 +1,7 @@
 <div class="bank-container">
     <div class="bank-header">
         <h2>🏦 ACQUIRER BANKA</h2>
-        <p>Sigurno plaćanje karticom</p>
+        <p>🔐 PCI DSS Compliant - Sigurno plaćanje karticom</p>
         <div class="timer" [class.warning]="isExpiringSoon">
             <span class="hourglass">⏳</span> Sesija ističe za: <strong>{{ timeLeft }}</strong>
         </div>
@@ -14,28 +14,31 @@
 
     <form (ngSubmit)="submitPayment()" *ngIf="!isSuccess && !isExpired">
         <div class="form-group">
-            <label>Broj kartice (PAN)</label>
+            <label>Broj kartice (PAN) *</label>
             <div class="input-wrapper">
-                <input type="text" 
-                       [(ngModel)]="cardData.pan" 
-                       (input)="detectCardType()" 
-                       name="pan" 
-                       placeholder="0000 0000 0000 0000" 
+                <!-- PCI DSS 3.4 - Display masked PAN -->
+                <input type="text"
+                       [(ngModel)]="displayPan"
+                       (input)="onPanInput($event)"
+                       name="pan"
+                       placeholder="0000 0000 0000 0000"
+                       maxlength="23"
                        required
+                       autocomplete="cc-number"
                        class="pan-input">
-                
+
                 <div class="card-icons">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" 
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
                          alt="Visa" class="card-logo"
                          [class.active]="cardType === 'visa'"
                          [class.faded]="cardType && cardType !== 'visa'">
 
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
                          alt="Mastercard" class="card-logo"
                          [class.active]="cardType === 'mastercard'"
                          [class.faded]="cardType && cardType !== 'mastercard'">
 
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b3/DinaCard_logo.svg" 
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b3/DinaCard_logo.svg"
                          alt="DinaCard" class="card-logo"
                          [class.active]="cardType === 'dina'"
                          [class.faded]="cardType && cardType !== 'dina'">
@@ -44,25 +47,59 @@
         </div>
 
         <div class="form-group">
-            <label>Ime vlasnika (CARD_HOLDER_NAME)</label>
-            <input type="text" [(ngModel)]="cardData.cardHolder" name="holder" placeholder="IME PREZIME" class="standard-input">
+            <label>Ime vlasnika (CARD_HOLDER_NAME) *</label>
+            <input type="text"
+                   [(ngModel)]="cardData.cardHolder"
+                   name="holder"
+                   placeholder="IME PREZIME"
+                   autocomplete="cc-name"
+                   pattern="[a-zA-Z\s\-'.]{2,50}"
+                   required
+                   class="standard-input">
         </div>
 
         <div class="row">
             <div class="form-group w-50">
-                <label>Važi do (MM/YY)</label>
-                <input type="text" [(ngModel)]="cardData.expiryDate" name="expiry" placeholder="12/28" class="standard-input">
+                <label>Važi do (MM/YY) *</label>
+                <input type="text"
+                       [(ngModel)]="cardData.expiryDate"
+                       (input)="onExpiryInput($event)"
+                       name="expiry"
+                       placeholder="12/28"
+                       maxlength="5"
+                       autocomplete="cc-exp"
+                       required
+                       class="standard-input">
             </div>
             <div class="form-group w-50">
-                <label>Security Code (CVV)</label>
-                <input type="password" [(ngModel)]="cardData.cvv" name="cvv" placeholder="123" class="standard-input">
+                <label>Security Code (CVV) *</label>
+                <!-- PCI DSS 3.2 - Never store CVV -->
+                <input type="password"
+                       [(ngModel)]="cardData.cvv"
+                       name="cvv"
+                       placeholder="123"
+                       maxlength="4"
+                       pattern="\d{3,4}"
+                       autocomplete="cc-csc"
+                       required
+                       class="standard-input">
             </div>
         </div>
 
-        <button type="submit" class="btn-pay" [disabled]="isExpired">POTVRDI PLAĆANJE</button>
+        <button type="submit"
+                class="btn-pay"
+                [disabled]="isExpired || isProcessing">
+            {{ isProcessing ? '⏳ Obrada...' : 'POTVRDI PLAĆANJE' }}
+        </button>
     </form>
 
     <div *ngIf="message" class="alert" [ngClass]="isSuccess ? 'success' : 'error'">
         {{ message }}
+    </div>
+
+    <!-- PCI DSS Notice -->
+    <div class="pci-notice" *ngIf="!isSuccess && !isExpired">
+        <p>🔒 Vaši podaci su zaštićeni u skladu sa PCI DSS standardom</p>
+        <p style="font-size: 11px;">Podaci o kartici se ne čuvaju i koriste se samo za ovu transakciju</p>
     </div>
 </div>
