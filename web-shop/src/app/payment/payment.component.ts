@@ -30,11 +30,16 @@ export class PaymentComponent {
 
   // Ubacujemo servis u konstruktor
   constructor(private paymentService: PaymentService) {
-    // Pokušaj učitavanja iz LocalStorage (simulacija konfiguracije prodavnice nakon pretplate)
+    // Učitavanje merchant kredencijala iz LocalStorage
     const storedId = localStorage.getItem('merchantId');
     const storedPass = localStorage.getItem('merchantPassword');
-    this.transaction.merchantId = storedId || '12345'; // Fallback na test ID
-    this.transaction.merchantPassword = storedPass || 'password';
+    
+    if (!storedId || !storedPass) {
+      console.warn('⚠️ Merchant credentials not found! Please register at /merchant-subscription first.');
+    }
+    
+    this.transaction.merchantId = storedId || '';
+    this.transaction.merchantPassword = storedPass || '';
   }
 
   initiatePayment() {

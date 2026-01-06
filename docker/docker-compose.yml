@@ -119,6 +119,7 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: user
       RABBITMQ_PASSWORD: password
+      PSP_DISABLE_AUTH: "true"
     depends_on:
       psp-core-db:
         condition: service_healthy
