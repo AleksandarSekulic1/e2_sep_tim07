@@ -35,10 +35,10 @@ export class PaymentMethodsComponent implements OnInit {
 
   ngOnInit() {
     this.transactionId = this.route.snapshot.paramMap.get('id') || '';
-    
+
     // Fetch Transaction details to check Merchant config
     if (this.transactionId) {
-       this.http.get<any>(`http://localhost:8084/core/transactions/${this.transactionId}`).subscribe({
+      this.http.get<any>(`/api/core/transactions/${this.transactionId}`).subscribe({
          next: (tx) => {
            this.amount = tx.amount;
            this.currency = tx.currency;
@@ -65,8 +65,8 @@ export class PaymentMethodsComponent implements OnInit {
     if (amountParam) this.amount = Number(amountParam);
 
     this.currency = this.route.snapshot.queryParamMap.get('currency') || this.currency;
-    this.successUrl = this.route.snapshot.queryParamMap.get('successUrl') || 'http://localhost:4200/success';
-    this.failedUrl = this.route.snapshot.queryParamMap.get('failedUrl') || 'http://localhost:4200/failed';
+    this.successUrl = this.route.snapshot.queryParamMap.get('successUrl') || `${window.location.origin}/success`;
+    this.failedUrl = this.route.snapshot.queryParamMap.get('failedUrl') || `${window.location.origin}/failed`;
 
     console.log("PSP Podaci:", { id: this.transactionId, amount: this.amount, currency: this.currency, success: this.successUrl });
   }
@@ -117,7 +117,7 @@ export class PaymentMethodsComponent implements OnInit {
   chooseQR() {
     console.log("Biramo plaćanje QR kodom...");
     // Preusmeravamo na novu komponentu koju ćemo sad napraviti
-    window.location.href = `http://localhost:4200/qr-payment/${this.transactionId}?amount=${this.amount}`;
+    window.location.href = `/qr-payment/${this.transactionId}?amount=${this.amount}`;
   }
 
   choosePayPal() {
@@ -177,7 +177,7 @@ export class PaymentMethodsComponent implements OnInit {
           cryptoType: response.cryptoType,
           privateKeyWif: response.privateKeyWif
         });
-        window.location.href = `http://localhost:4200/crypto-payment/${this.transactionId}?${params.toString()}`;
+        window.location.href = `/crypto-payment/${this.transactionId}?${params.toString()}`;
       },
       error: (err: any) => {
         console.error("❌ Greška pri inicijalizaciji Crypto plaćanja:", err);

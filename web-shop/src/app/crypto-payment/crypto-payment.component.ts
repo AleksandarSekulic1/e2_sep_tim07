@@ -34,7 +34,7 @@ export class CryptoPaymentComponent implements OnInit, OnDestroy {
   sendingWithMetaMask = false;
 
   private pollingSubscription?: Subscription;
-  private readonly GATEWAY_URL = 'http://localhost:8084';
+  private readonly GATEWAY_URL = '/api';
   private ethereum: any;
 
   constructor(

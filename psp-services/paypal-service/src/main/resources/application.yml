@@ -20,5 +20,5 @@ paypal:
   api:
     base-url: https://api-m.sandbox.paypal.com
   # Your application URLs for return and cancel
-  return-url: http://localhost:4200/success
-  cancel-url: http://localhost:4200/failed
+  return-url: ${PSP_FRONTEND_URL:https://localhost}/success
+  cancel-url: ${PSP_FRONTEND_URL:https://localhost}/failed

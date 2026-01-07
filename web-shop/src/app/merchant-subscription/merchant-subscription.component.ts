@@ -13,9 +13,9 @@ import { PspService, Merchant } from '../services/psp.service';
 export class MerchantSubscriptionComponent implements OnInit {
 
   merchantName: string = '';
-  successUrl: string = 'http://localhost:4200/success';
-  failedUrl: string = 'http://localhost:4200/failed';
-  errorUrl: string = 'http://localhost:4200/error';
+  successUrl: string = `${window.location.origin}/success`;
+  failedUrl: string = `${window.location.origin}/failed`;
+  errorUrl: string = `${window.location.origin}/error`;
   // Checkboxes
   bankEnabled: boolean = false;
   paypalEnabled: boolean = false;

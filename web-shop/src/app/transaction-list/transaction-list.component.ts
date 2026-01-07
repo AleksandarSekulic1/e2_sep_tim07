@@ -38,7 +38,7 @@ export class TransactionListComponent implements OnInit, OnDestroy {
 
   loadTransactions() {
     const timestamp = new Date().getTime();
-    this.http.get<any[]>(`http://localhost:8084/core/transactions?t=${timestamp}`)
+    this.http.get<any[]>(`/api/core/transactions?t=${timestamp}`)
       .subscribe({
         next: (data) => {
           const sortedData = data.sort((a, b) => b.id - a.id);

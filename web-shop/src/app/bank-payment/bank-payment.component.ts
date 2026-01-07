@@ -161,7 +161,7 @@ export class BankPaymentComponent implements OnInit, OnDestroy {
     console.log('🔐 PCI DSS: Sending payment request - Order:', cleanData.merchantOrderId);
 
     // Note: In production, use HTTPS (TLS 1.2+) - PCI DSS 4.1
-    this.http.post('http://localhost:8084/bank/api/bank/pay', cleanData)
+    this.http.post('/api/bank/pay', cleanData)
       .subscribe({
         next: (res: any) => {
           this.isSuccess = true;

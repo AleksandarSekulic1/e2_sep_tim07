@@ -99,7 +99,7 @@ export class PaypalPaymentComponent implements OnInit, OnDestroy {
       merchantOrderId: this.merchantOrderId
     };
 
-    this.http.post('http://localhost:8084/paypal/paypal/execute-payment', executeRequest)
+    this.http.post('/api/paypal/paypal/execute-payment', executeRequest)
       .subscribe({
         next: (res: any) => {
           this.isSuccess = true;
@@ -131,7 +131,7 @@ export class PaypalPaymentComponent implements OnInit, OnDestroy {
   cancelPayment() {
     if (this.timerInterval) clearInterval(this.timerInterval);
 
-    this.http.post(`http://localhost:8084/paypal/paypal/cancel-payment?paymentId=${this.paymentId}&merchantOrderId=${this.merchantOrderId}`, {})
+      this.http.post(`/api/paypal/paypal/cancel-payment?paymentId=${this.paymentId}&merchantOrderId=${this.merchantOrderId}`, {})
       .subscribe({
         next: () => {
           if (this.failedUrl) {
