@@ -23,13 +23,13 @@ public class TransactionController {
     @Autowired
     private com.psp.core.repository.TransactionRepository transactionRepository;
 
-    @PostMapping("/initiate") 
+    @PostMapping("/initiate")
     public ResponseEntity<?> initiateTransaction(@RequestBody PaymentRequest request) {
         if (isAuthDisabled()) {
             Transaction saved = transactionService.createInitialTransaction(request);
             Map<String, Object> response = new HashMap<>();
             response.put("pspTransactionId", saved.getId());
-            response.put("paymentUrl", "http://localhost:4200/payment-methods/" + saved.getId());
+            response.put("paymentUrl", "/payment-methods/" + saved.getId());
             return ResponseEntity.ok(response);
         }
 
@@ -38,7 +38,7 @@ public class TransactionController {
                 Transaction saved = transactionService.createInitialTransaction(request);
                 Map<String, Object> response = new HashMap<>();
                 response.put("pspTransactionId", saved.getId());
-                response.put("paymentUrl", "http://localhost:4200/payment-methods/" + saved.getId());
+                response.put("paymentUrl", "/payment-methods/" + saved.getId());
                 return ResponseEntity.ok(response);
             })
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Auth failed"));

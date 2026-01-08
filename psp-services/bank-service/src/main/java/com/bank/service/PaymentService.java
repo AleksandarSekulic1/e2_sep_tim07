@@ -28,10 +28,16 @@ public class PaymentService {
         String paymentId = UUID.randomUUID().toString();
         Instant expiryTime = Instant.now().plus(15, ChronoUnit.MINUTES);
 
-        String paymentUrl = "http://localhost:4200/bank-payment/" + paymentId + 
+        String baseUrl = System.getenv().getOrDefault("PSP_FRONTEND_URL", "https://localhost");
+        String successUrl = request.getSuccessUrl() != null ? request.getSuccessUrl() : baseUrl + "/success";
+        String failedUrl = request.getFailedUrl() != null ? request.getFailedUrl() : baseUrl + "/failed";
+        
+        String paymentUrl = baseUrl + "/bank-payment/" + paymentId + 
                             "?amount=" + request.getAmount() + 
                             "&merchantOrderId=" + request.getMerchantOrderId() +
-                            "&expiresAt=" + expiryTime.toString();
+                            "&expiresAt=" + expiryTime.toString() +
+                            "&successUrl=" + successUrl +
+                            "&failedUrl=" + failedUrl;
 
         Map<String, String> response = new HashMap<>();
         response.put("paymentId", paymentId);

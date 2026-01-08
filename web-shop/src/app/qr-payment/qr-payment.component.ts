@@ -18,8 +18,8 @@ export class QRPaymentComponent implements OnInit, OnDestroy {
   message: string = ''; // Polje za prikaz poruka o uspehu ili greškama
   pollingInterval: any;
 
-  // Koristimo port 8080 jer tvoj API Gateway upravlja CORS-om i rutiranjem
-  private baseUrl = 'http://localhost:8084/core';
+  // Koristimo gateway relativnu putanju (/api)
+  private baseUrl = '/api/core';
 
   constructor(
     private route: ActivatedRoute,

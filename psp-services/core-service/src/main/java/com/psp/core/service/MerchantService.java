@@ -218,14 +218,15 @@ public class MerchantService {
     }
 
     private void hydrateUrlsIfMissing(Merchant merchant) {
+        String baseUrl = System.getenv().getOrDefault("PSP_FRONTEND_URL", "https://localhost");
         if (merchant.getSuccessUrl() == null || merchant.getSuccessUrl().isBlank()) {
-            merchant.setSuccessUrl("http://localhost:4200/success");
+            merchant.setSuccessUrl(baseUrl + "/success");
         }
         if (merchant.getFailedUrl() == null || merchant.getFailedUrl().isBlank()) {
-            merchant.setFailedUrl("http://localhost:4200/failed");
+            merchant.setFailedUrl(baseUrl + "/failed");
         }
         if (merchant.getErrorUrl() == null || merchant.getErrorUrl().isBlank()) {
-            merchant.setErrorUrl("http://localhost:4200/error");
+            merchant.setErrorUrl(baseUrl + "/error");
         }
     }
 }

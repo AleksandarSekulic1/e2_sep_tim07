@@ -16,7 +16,7 @@ export interface Merchant {
   providedIn: 'root'
 })
 export class PspService {
-  private apiUrl = 'http://localhost:8084/core/merchants'; 
+  private apiUrl = '/api/core/merchants';
 
   constructor(private http: HttpClient) { }
 

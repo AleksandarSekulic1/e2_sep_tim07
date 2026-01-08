@@ -9,8 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @SpringBootApplication
+@EnableWebFluxSecurity
 public class ApiGatewayApplication {
 
     public static void main(String[] args) {
@@ -56,6 +60,9 @@ public class ApiGatewayApplication {
         config.addAllowedOrigin("http://localhost:4200"); // Angular PSP
         // Ako ćeš imati i poseban frontend za banku (npr. na portu 4202), dodaj i njega:
         config.addAllowedOrigin("http://localhost:4202"); 
+        // Allow HTTPS origins served via nginx
+        config.addAllowedOrigin("https://localhost");
+        config.addAllowedOrigin("https://localhost:4200");
         
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
@@ -64,5 +71,15 @@ public class ApiGatewayApplication {
         source.registerCorsConfiguration("/**", config);
         
         return new CorsWebFilter(source);
+    }
+
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        return http
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+            .authorizeExchange(exchange -> exchange.anyExchange().permitAll())
+            .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+            .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+            .build();
     }
 }

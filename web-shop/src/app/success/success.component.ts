@@ -14,11 +14,11 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './success.component.html',
   styleUrl: './success.component.css'
 })
-export class SuccessComponent implements OnInit {
+export class SuccessComponent implements OnInit
   status: 'idle' | 'processing' | 'success' | 'failed' = 'idle';
   message = '';
 
-  private readonly GATEWAY_URL = 'http://localhost:8084';
+  private readonly GATEWAY_URL = '/api';
 
   constructor(
     private route: ActivatedRoute,
@@ -27,14 +27,18 @@ export class SuccessComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    console.log('SuccessComponent loaded. Params:', this.route.snapshot.queryParams);
     const paymentId = this.route.snapshot.queryParamMap.get('token'); // PayPal returns token=orderId
     // For Orders v2 redirect, PayerID might be absent; do not block capture if missing
     const payerId = this.route.snapshot.queryParamMap.get('PayerID');
     const merchantOrderId = this.route.snapshot.queryParamMap.get('merchantOrderId');
 
+    // If no PayPal token, this is payment by other method (card/bank) that was already confirmed
     if (!paymentId) {
-      this.status = 'failed';
-      this.message = 'Nedostaje PayPal token (orderId).';
+      console.log('No PayPal token found, assuming alternative payment method success.');
+      this.status = 'success';
+      this.message = '✅ Plaćanje uspešno potvrđeno!';
+      setTimeout(() => this.router.navigate(['/transactions']), 2500);
       return;
     }
 

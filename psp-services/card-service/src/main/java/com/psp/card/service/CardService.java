@@ -30,12 +30,16 @@ public class CardService {
     }
 
     public Map<String, Object> getPaymentUrlFromBank(CardPaymentRequest request) {
+        String baseUrl = System.getenv().getOrDefault("PSP_FRONTEND_URL", "https://localhost");
+        
         Map<String, Object> bankRequest = new HashMap<>();
         bankRequest.put("merchantId", "PSP_CLIENT_ID_123");
         bankRequest.put("amount", request.getAmount());
         bankRequest.put("currency", request.getCurrency());
         bankRequest.put("merchantOrderId", request.getMerchantOrderId());
         bankRequest.put("merchantTimestamp", LocalDateTime.now().toString());
+        bankRequest.put("successUrl", baseUrl + "/success");
+        bankRequest.put("failedUrl", baseUrl + "/failed");
 
         ResponseEntity<Map> bankResponse = restTemplate.postForEntity(BANK_SERVICE_URL, bankRequest, Map.class);
         return bankResponse.getBody();

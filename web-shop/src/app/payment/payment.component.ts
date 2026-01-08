@@ -20,9 +20,9 @@ export class PaymentComponent {
     merchantPassword: '',
     merchantOrderId: '',
     merchantTimestamp: '',
-    successUrl: 'http://localhost:4200/success',
-    failedUrl: 'http://localhost:4200/failed',
-    errorUrl: 'http://localhost:4200/error'
+    successUrl: `${window.location.origin}/success`,
+    failedUrl: `${window.location.origin}/failed`,
+    errorUrl: `${window.location.origin}/error`
   };
 
   responseMessage = '';
@@ -33,11 +33,11 @@ export class PaymentComponent {
     // Učitavanje merchant kredencijala iz LocalStorage
     const storedId = localStorage.getItem('merchantId');
     const storedPass = localStorage.getItem('merchantPassword');
-    
+
     if (!storedId || !storedPass) {
       console.warn('⚠️ Merchant credentials not found! Please register at /merchant-subscription first.');
     }
-    
+
     this.transaction.merchantId = storedId || '';
     this.transaction.merchantPassword = storedPass || '';
   }
