@@ -14,7 +14,7 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './success.component.html',
   styleUrl: './success.component.css'
 })
-export class SuccessComponent implements OnInit
+export class SuccessComponent implements OnInit {
   status: 'idle' | 'processing' | 'success' | 'failed' = 'idle';
   message = '';
 
