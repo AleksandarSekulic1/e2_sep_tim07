@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 # Initialize replication user and configure pg_hba.conf for streaming replication
 set -e

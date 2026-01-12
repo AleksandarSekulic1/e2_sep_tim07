@@ -33,16 +33,16 @@ if ! command -v docker-compose &> /dev/null; then
     exit 1
 fi
 
-echo "✓ Docker and Docker Compose are installed"
+echo "âœ“ Docker and Docker Compose are installed"
 echo ""
 
 # Step 2: Generate SSL certificates
 echo "[2/5] Generating SSL certificates..."
 if [ -f "$SCRIPT_DIR/ssl/server.crt" ]; then
-    echo "⚠ SSL certificates already exist, skipping generation"
+    echo "âš  SSL certificates already exist, skipping generation"
 else
     bash "$SCRIPT_DIR/generate-certificates.sh"
-    echo "✓ SSL certificates generated"
+    echo "âœ“ SSL certificates generated"
 fi
 echo ""
 
@@ -50,7 +50,7 @@ echo ""
 echo "[3/5] Building Docker images..."
 docker-compose -f "$COMPOSE_FILE" build --no-cache
 
-echo "✓ Docker images built successfully"
+echo "âœ“ Docker images built successfully"
 echo ""
 
 # Step 4: Start infrastructure
@@ -71,7 +71,7 @@ echo "Waiting for infrastructure to be healthy..."
 sleep 10
 
 docker-compose -f "$COMPOSE_FILE" ps
-echo "✓ Infrastructure started successfully"
+echo "âœ“ Infrastructure started successfully"
 echo ""
 
 # Step 5: Start microservices with scaling
@@ -90,7 +90,7 @@ sleep 15
 
 echo ""
 echo "=========================================="
-echo "✓ Deployment Complete!"
+echo "âœ“ Deployment Complete!"
 echo "=========================================="
 echo ""
 echo "Access Points:"
