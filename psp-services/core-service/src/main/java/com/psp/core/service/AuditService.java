@@ -145,11 +145,11 @@ public class AuditService {
 
     /**
      * Straničeni pristup svim logovima
+     * Note: We don't log access to audit logs within this read-only transaction
+     * to avoid write conflicts. Audit log access can be tracked separately.
      */
     @Transactional(readOnly = true)
     public Page<AuditLog> getAllLogs(int page, int size) {
-        log(AuditActionType.AUDIT_LOG_ACCESSED, "ADMIN", null, 
-            "AUDIT_LOG", AuditOutcome.SUCCESS, "Page: " + page);
         return auditLogRepository.findAllByOrderByTimestampDesc(PageRequest.of(page, size));
     }
 

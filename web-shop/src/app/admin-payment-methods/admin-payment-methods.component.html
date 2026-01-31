@@ -1,0 +1,66 @@
+<div class="admin-container">
+  <h1>💳 Upravljanje Načinima Plaćanja</h1>
+  <p class="subtitle">Dodajte, aktivirajte ili deaktivirajte načine plaćanja</p>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✅ {{ successMessage }}
+  </div>
+
+  <!-- Add new payment method -->
+  <div class="add-method-card">
+    <h3>➕ Dodaj Novi Način Plaćanja</h3>
+    <div class="form-row">
+      <input 
+        type="text" 
+        [(ngModel)]="newMethod.name" 
+        placeholder="Naziv (npr. Kreditna kartica)"
+        class="form-input"
+      />
+      <input 
+        type="text" 
+        [(ngModel)]="newMethod.code" 
+        placeholder="Kod (npr. CARD)"
+        class="form-input"
+      />
+      <input 
+        type="text" 
+        [(ngModel)]="newMethod.description" 
+        placeholder="Opis (opciono)"
+        class="form-input"
+      />
+      <button class="btn-add" (click)="addPaymentMethod()">Dodaj</button>
+    </div>
+  </div>
+
+  <!-- Payment methods list -->
+  <div class="methods-list" *ngIf="!isLoading">
+    <div *ngFor="let method of paymentMethods" class="method-card" [class.inactive]="!method.isActive">
+      <div class="method-info">
+        <h3>{{ method.name }}</h3>
+        <span class="method-code">{{ method.code }}</span>
+        <p *ngIf="method.description">{{ method.description }}</p>
+      </div>
+      <div class="method-actions">
+        <span class="status-badge" [class.active]="method.isActive" [class.inactive]="!method.isActive">
+          {{ method.isActive ? '✅ Aktivan' : '❌ Neaktivan' }}
+        </span>
+        <button 
+          class="btn-toggle" 
+          [class.btn-deactivate]="method.isActive"
+          [class.btn-activate]="!method.isActive"
+          (click)="togglePaymentMethod(method)"
+        >
+          {{ method.isActive ? 'Deaktiviraj' : 'Aktiviraj' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    ⏳ Učitavanje...
+  </div>
+</div>

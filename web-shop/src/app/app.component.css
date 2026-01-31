@@ -8,10 +8,21 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffc107;
+}
+
 .brand-title {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #ffc107; /* Zuta boja za brend */
+  color: #ffc107;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
 }
 
 .navbar-links a {
@@ -28,10 +39,91 @@
   background-color: #555;
 }
 
-.navbar-links a.active {
-  background-color: #007bff; /* Plava za aktivni tab */
+.navbar-links a.active-link {
+  background-color: #007bff;
+}
+
+.navbar-auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-link {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.auth-link:hover {
+  background-color: #555;
+}
+
+.register-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-weight: 500;
+}
+
+.register-btn:hover {
+  background: linear-gradient(135deg, #5a6fd6 0%, #6a4291 100%);
+}
+
+.user-info {
+  color: #ffc107;
+  font-weight: 500;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.admin-badge {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+}
+
+.customer-badge {
+  background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+  color: white;
+}
+
+.admin-link {
+  background-color: rgba(231, 76, 60, 0.2) !important;
+  border: 1px solid #e74c3c;
+}
+
+.admin-link:hover {
+  background-color: rgba(231, 76, 60, 0.4) !important;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
 }
 
 .content-wrapper {
   padding: 20px;
+}
+
+.main-content {
+  min-height: calc(100vh - 70px);
 }

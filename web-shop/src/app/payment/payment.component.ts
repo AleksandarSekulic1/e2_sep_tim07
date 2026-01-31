@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PaymentService } from '../services/payment.service'; // <--- Importuj servis
+import { Router, RouterLink } from '@angular/router';
+import { PaymentService } from '../services/payment.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule], // HttpClientModule više ne treba ovde jer je u app.config
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.css']
 })
@@ -28,8 +30,11 @@ export class PaymentComponent {
   responseMessage = '';
   isError = false;
 
-  // Ubacujemo servis u konstruktor
-  constructor(private paymentService: PaymentService) {
+  constructor(
+    private paymentService: PaymentService,
+    public authService: AuthService,
+    private router: Router
+  ) {
     // Učitavanje merchant kredencijala iz LocalStorage
     const storedId = localStorage.getItem('merchantId');
     const storedPass = localStorage.getItem('merchantPassword');
@@ -43,6 +48,16 @@ export class PaymentComponent {
   }
 
   initiatePayment() {
+    // Check authentication before allowing payment
+    if (!this.authService.isAuthenticated()) {
+      this.isError = true;
+      this.responseMessage = '🔐 Morate biti prijavljeni da biste izvršili rezervaciju.';
+      setTimeout(() => {
+        this.router.navigate(['/login'], { queryParams: { returnUrl: '/payment' } });
+      }, 1500);
+      return;
+    }
+
     // 1. Validacija
     if (!this.transaction.amount || this.transaction.amount <= 0) {
       this.isError = true;
@@ -77,7 +92,14 @@ export class PaymentComponent {
       error: (error) => {
         console.error('Greška:', error);
         this.isError = true;
-        this.responseMessage = '❌ Greška pri komunikaciji sa serverom (Proveri API Gateway).';
+        if (error.status === 401) {
+          this.responseMessage = '🔐 Sesija je istekla. Molimo prijavite se ponovo.';
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 1500);
+        } else {
+          this.responseMessage = '❌ Greška pri komunikaciji sa serverom (Proveri API Gateway).';
+        }
       }
     });
   }
