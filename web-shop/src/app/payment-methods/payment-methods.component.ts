@@ -20,10 +20,11 @@ export class PaymentMethodsComponent implements OnInit {
   successUrl: string = '';
   failedUrl: string = '';
 
-  // Subscription-based flags
-  bankAllowed: boolean = true;
-  paypalAllowed: boolean = true;
-  cryptoAllowed: boolean = true;
+  // Subscription-based flags - separated for all 4 methods
+  cardAllowed: boolean = false;
+  qrAllowed: boolean = false;
+  paypalAllowed: boolean = false;
+  cryptoAllowed: boolean = false;
   loading: boolean = true;
 
   constructor(
@@ -36,30 +37,6 @@ export class PaymentMethodsComponent implements OnInit {
   ngOnInit() {
     this.transactionId = this.route.snapshot.paramMap.get('id') || '';
 
-    // Fetch Transaction details to check Merchant config
-    if (this.transactionId) {
-      this.http.get<any>(`/api/core/transactions/${this.transactionId}`).subscribe({
-         next: (tx) => {
-           this.amount = tx.amount;
-           this.currency = tx.currency;
-           // Fetch merchant allowed methods + URLs without exposing password
-           this.pspService.getAllowedMethods(tx.merchantId).subscribe({
-             next: (methodsResponse: any) => {
-               this.filterMethods(methodsResponse);
-               this.successUrl = methodsResponse.successUrl || this.successUrl;
-               this.failedUrl = methodsResponse.failedUrl || this.failedUrl;
-               this.loading = false;
-             },
-             error: () => this.loading = false
-           });
-         },
-         error: (err) => {
-           console.error("Failed to load tx", err);
-           this.loading = false;
-         }
-       });
-    }
-
     // Capture query params just in case (fallback)
     const amountParam = this.route.snapshot.queryParamMap.get('amount');
     if (amountParam) this.amount = Number(amountParam);
@@ -68,12 +45,68 @@ export class PaymentMethodsComponent implements OnInit {
     this.successUrl = this.route.snapshot.queryParamMap.get('successUrl') || `${window.location.origin}/success`;
     this.failedUrl = this.route.snapshot.queryParamMap.get('failedUrl') || `${window.location.origin}/failed`;
 
+    // Fetch Transaction details to check Merchant config
+    if (this.transactionId) {
+      this.http.get<any>(`/api/core/transactions/${this.transactionId}`).subscribe({
+         next: (tx) => {
+           this.amount = tx.amount;
+           this.currency = tx.currency;
+           
+           // Check if merchantId exists
+           if (tx.merchantId) {
+             // Fetch merchant allowed methods + URLs without exposing password
+             this.pspService.getAllowedMethods(tx.merchantId).subscribe({
+               next: (methodsResponse: any) => {
+                 this.filterMethods(methodsResponse);
+                 this.successUrl = methodsResponse.successUrl || this.successUrl;
+                 this.failedUrl = methodsResponse.failedUrl || this.failedUrl;
+                 this.loading = false;
+               },
+               error: () => {
+                 // If merchant not found, enable all methods as fallback
+                 console.log('Merchant not found, enabling all payment methods');
+                 this.enableAllMethods();
+                 this.loading = false;
+               }
+             });
+           } else {
+             // No merchantId in transaction, enable all methods
+             console.log('No merchantId in transaction, enabling all payment methods');
+             this.enableAllMethods();
+             this.loading = false;
+           }
+         },
+         error: (err) => {
+           console.error("Failed to load tx", err);
+           // Enable all methods as fallback
+           this.enableAllMethods();
+           this.loading = false;
+         }
+       });
+    } else {
+      // No transaction ID, enable all methods
+      this.enableAllMethods();
+      this.loading = false;
+    }
+
     console.log("PSP Podaci:", { id: this.transactionId, amount: this.amount, currency: this.currency, success: this.successUrl });
   }
 
+  enableAllMethods(): void {
+    this.cardAllowed = true;
+    this.qrAllowed = true;
+    this.paypalAllowed = true;
+    this.cryptoAllowed = true;
+  }
+
   filterMethods(merchant: Merchant | any) {
-    if (!merchant.paymentMethods) return;
-    this.bankAllowed = merchant.paymentMethods.includes('BANK');
+    if (!merchant.paymentMethods || merchant.paymentMethods.length === 0) {
+      // If no methods configured, enable all as fallback
+      this.enableAllMethods();
+      return;
+    }
+    this.cardAllowed = merchant.paymentMethods.includes('CARD');
+    this.qrAllowed = merchant.paymentMethods.includes('QR');
     this.paypalAllowed = merchant.paymentMethods.includes('PAYPAL');
     this.cryptoAllowed = merchant.paymentMethods.includes('CRYPTO');
   }

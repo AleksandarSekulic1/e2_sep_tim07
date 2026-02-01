@@ -27,6 +27,17 @@ spring:
         format_sql: true
         use_sql_comments: true
 
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:PSP_JWT_SECRET_KEY_CHANGE_IN_PRODUCTION_MIN_256_BITS_LONG_ENOUGH}
+  expiration: 3600000  # 1 hour in milliseconds
+  refresh-expiration: 86400000  # 24 hours in milliseconds
+
+# PSP Configuration
+psp:
+  disable-auth: ${PSP_DISABLE_AUTH:false}
+  frontend-url: ${PSP_FRONTEND_URL:https://localhost}
+
 # PCI DSS Security Configuration
 pci-dss:
   # PCI DSS 3.5 - Encryption key (should be in environment variable in production)

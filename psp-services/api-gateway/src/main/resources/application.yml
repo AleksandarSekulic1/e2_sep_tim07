@@ -21,10 +21,29 @@ spring:
               - DELETE
               - OPTIONS
             allowedHeaders: "*"
+            exposedHeaders:
+              - Authorization
+              - X-Merchant-Id
             allowCredentials: true
       
       # Definisanje ruta ka tvojim mikroservisima
       routes:
+        # Auth routes (public) - handles /auth/* (nginx strips /api prefix)
+        - id: auth-service
+          uri: http://core-service:8080
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=0
+        
+        # Admin routes (protected - Super Admin only)
+        - id: admin-service
+          uri: http://core-service:8080
+          predicates:
+            - Path=/admin/**
+          filters:
+            - StripPrefix=0
+
         # Rute za CORE servis (uključuje transakcije i QR kod)
         - id: core-service
           uri: http://core-service:8080

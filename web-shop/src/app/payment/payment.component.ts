@@ -1,22 +1,28 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PaymentService } from '../services/payment.service'; // <--- Importuj servis
+import { Router, RouterLink } from '@angular/router';
+import { PaymentService } from '../services/payment.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule], // HttpClientModule više ne treba ovde jer je u app.config
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.css']
 })
 export class PaymentComponent {
 
+  // Default merchant credentials (Agencija za iznajmljivanje vozila)
+  private readonly DEFAULT_MERCHANT_ID = 'AGENCY_001';
+  private readonly DEFAULT_MERCHANT_PASSWORD = 'MerchantPass123!';
+
   // Podaci za inicijalizaciju (Tabela 1 iz specifikacije)
   transaction: any = {
     amount: 5000,            // Podrazumevana vrednost
     currency: 'RSD',
-    merchantId: '',          // Učitavamo iz LocalStorage
+    merchantId: '',          // Učitavamo iz LocalStorage ili koristimo default
     merchantPassword: '',
     merchantOrderId: '',
     merchantTimestamp: '',
@@ -28,21 +34,40 @@ export class PaymentComponent {
   responseMessage = '';
   isError = false;
 
-  // Ubacujemo servis u konstruktor
-  constructor(private paymentService: PaymentService) {
-    // Učitavanje merchant kredencijala iz LocalStorage
+  constructor(
+    private paymentService: PaymentService,
+    public authService: AuthService,
+    private router: Router
+  ) {
+    // Učitavanje merchant kredencijala iz LocalStorage ili koristi default
     const storedId = localStorage.getItem('merchantId');
     const storedPass = localStorage.getItem('merchantPassword');
 
     if (!storedId || !storedPass) {
-      console.warn('⚠️ Merchant credentials not found! Please register at /merchant-subscription first.');
+      // Use default merchant (Agencija za iznajmljivanje vozila)
+      console.log('ℹ️ Using default merchant: ' + this.DEFAULT_MERCHANT_ID);
+      this.transaction.merchantId = this.DEFAULT_MERCHANT_ID;
+      this.transaction.merchantPassword = this.DEFAULT_MERCHANT_PASSWORD;
+      // Optionally save to localStorage
+      localStorage.setItem('merchantId', this.DEFAULT_MERCHANT_ID);
+      localStorage.setItem('merchantPassword', this.DEFAULT_MERCHANT_PASSWORD);
+    } else {
+      this.transaction.merchantId = storedId;
+      this.transaction.merchantPassword = storedPass;
     }
-
-    this.transaction.merchantId = storedId || '';
-    this.transaction.merchantPassword = storedPass || '';
   }
 
   initiatePayment() {
+    // Check authentication before allowing payment
+    if (!this.authService.isAuthenticated()) {
+      this.isError = true;
+      this.responseMessage = '🔐 Morate biti prijavljeni da biste izvršili rezervaciju.';
+      setTimeout(() => {
+        this.router.navigate(['/login'], { queryParams: { returnUrl: '/payment' } });
+      }, 1500);
+      return;
+    }
+
     // 1. Validacija
     if (!this.transaction.amount || this.transaction.amount <= 0) {
       this.isError = true;
@@ -77,7 +102,14 @@ export class PaymentComponent {
       error: (error) => {
         console.error('Greška:', error);
         this.isError = true;
-        this.responseMessage = '❌ Greška pri komunikaciji sa serverom (Proveri API Gateway).';
+        if (error.status === 401) {
+          this.responseMessage = '🔐 Sesija je istekla. Molimo prijavite se ponovo.';
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 1500);
+        } else {
+          this.responseMessage = '❌ Greška pri komunikaciji sa serverom (Proveri API Gateway).';
+        }
       }
     });
   }

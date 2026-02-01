@@ -2,11 +2,40 @@
   <div class="navbar-brand">
     🚗 Rent-A-Car Agency
   </div>
-  
+
   <div class="navbar-links">
-    <a routerLink="/payment" routerLinkActive="active-link">Nova Rezervacija</a>
-    <a routerLink="/transactions" routerLinkActive="active-link">Istorija Transakcija</a>
-    <a routerLink="/merchant-subscription" routerLinkActive="active-link" class="admin-link">⚙️ Admin Podešavanja</a>
+    <!-- Public: Vehicle browsing -->
+    <a routerLink="/payment" routerLinkActive="active-link">🚗 Vozila</a>
+
+    <!-- CUSTOMER only: Purchase history and rentals -->
+    <ng-container *ngIf="isCustomer">
+      <a routerLink="/transactions" routerLinkActive="active-link">📋 Moje Rezervacije</a>
+    </ng-container>
+
+    <!-- SUPER_ADMIN only: Admin panel -->
+    <ng-container *ngIf="isSuperAdmin">
+      <a routerLink="/merchant-subscription" routerLinkActive="active-link" class="admin-link">📝 Pretplata Web Shopa</a>
+      <a routerLink="/admin/audit-logs" routerLinkActive="active-link" class="admin-link">📊 Audit Logovi</a>
+    </ng-container>
+  </div>
+
+  <div class="navbar-auth">
+    <!-- Show when NOT authenticated -->
+    <ng-container *ngIf="!isAuthenticated">
+      <a routerLink="/login" class="auth-link">🔐 Prijava</a>
+      <a routerLink="/register" class="auth-link register-btn">📝 Registracija</a>
+    </ng-container>
+
+    <!-- Show when authenticated -->
+    <ng-container *ngIf="isAuthenticated">
+      <span class="user-info">
+        <span class="role-badge" [ngClass]="{'admin-badge': isSuperAdmin, 'customer-badge': isCustomer}">
+          {{ isSuperAdmin ? '👑 Admin' : '👤 Korisnik' }}
+        </span>
+        {{ currentUser?.firstName || currentUser?.username }}
+      </span>
+      <button class="logout-btn" (click)="logout()">Odjava</button>
+    </ng-container>
   </div>
 </nav>
 

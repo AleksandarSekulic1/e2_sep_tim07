@@ -1,0 +1,55 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>🔐 Prijava</h2>
+    <p class="subtitle">Dobrodošli nazad! Prijavite se da nastavite.</p>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="form-group">
+        <label for="usernameOrEmail">Korisničko ime ili Email</label>
+        <input
+          type="text"
+          id="usernameOrEmail"
+          name="usernameOrEmail"
+          [(ngModel)]="loginData.usernameOrEmail"
+          placeholder="Unesite korisničko ime ili email"
+          [disabled]="isLoading"
+          [class.input-error]="errorMessage && !loginData.usernameOrEmail"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Lozinka</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="loginData.password"
+          placeholder="Unesite lozinku"
+          [disabled]="isLoading"
+          [class.input-error]="errorMessage && !loginData.password"
+        />
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        ❌ {{ errorMessage }}
+      </div>
+
+      <div *ngIf="successMessage" class="success-message">
+        ✅ {{ successMessage }}
+      </div>
+
+      <button type="submit" class="btn-login" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Prijavi se</span>
+        <span *ngIf="isLoading">Prijavljivanje...</span>
+      </button>
+    </form>
+
+    <div class="register-link">
+      Nemate nalog? <a routerLink="/register">Registrujte se ovde</a>
+    </div>
+
+    <div class="back-link">
+      <a routerLink="/">← Nazad na početnu</a>
+    </div>
+  </div>
+</div>

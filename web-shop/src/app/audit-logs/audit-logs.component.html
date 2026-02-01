@@ -1,0 +1,70 @@
+<div class="admin-container">
+  <h1>📊 Audit Logovi</h1>
+  <p class="subtitle">Pregled svih autentifikacionih i autorizacionih događaja (PCI DSS)</p>
+
+  <div *ngIf="errorMessage" class="alert alert-error">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-row">
+    <div class="filter-group">
+      <label>Tip Akcije:</label>
+      <select [(ngModel)]="filterAction" class="filter-select">
+        <option value="">Sve akcije</option>
+        <option *ngFor="let action of actionTypes" [value]="action">{{ action }}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Ishod:</label>
+      <select [(ngModel)]="filterOutcome" class="filter-select">
+        <option value="">Svi ishodi</option>
+        <option *ngFor="let outcome of outcomes" [value]="outcome">{{ outcome }}</option>
+      </select>
+    </div>
+    <button class="btn-filter" (click)="applyFilter()">🔍 Filtriraj</button>
+    <button class="btn-clear" (click)="clearFilter()">✖️ Očisti</button>
+  </div>
+
+  <!-- Logs table -->
+  <div class="logs-table" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>Vreme</th>
+          <th>Akcija</th>
+          <th>Korisnik</th>
+          <th>Ishod</th>
+          <th>IP Adresa</th>
+          <th>Detalji</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of auditLogs" [class.failure-row]="log.outcome === 'FAILURE'">
+          <td class="timestamp">{{ log.timestamp | date:'dd.MM.yyyy HH:mm:ss' }}</td>
+          <td>
+            <span class="action-badge">
+              {{ getActionIcon(log.actionType) }} {{ log.actionType }}
+            </span>
+          </td>
+          <td>{{ log.actor }}</td>
+          <td>
+            <span class="outcome-badge" [ngClass]="getOutcomeClass(log.outcome)">
+              {{ log.outcome }}
+            </span>
+          </td>
+          <td class="ip-address">{{ log.clientIp }}</td>
+          <td class="details">{{ log.details }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    ⏳ Učitavanje...
+  </div>
+
+  <div *ngIf="!isLoading && auditLogs.length === 0" class="empty-state">
+    📭 Nema audit logova za prikaz
+  </div>
+</div>

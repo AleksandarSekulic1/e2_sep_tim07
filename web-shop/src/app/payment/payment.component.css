@@ -199,3 +199,62 @@ input[type="radio"] {
 .card-logo.faded {
   opacity: 0.2;
 }
+
+/* Auth banner styles */
+.auth-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.auth-banner span {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.auth-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-login-small,
+.btn-register-small {
+  padding: 10px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-login-small {
+  background: white;
+  color: #667eea;
+}
+
+.btn-register-small {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-login-small:hover,
+.btn-register-small:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.welcome-banner {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+}

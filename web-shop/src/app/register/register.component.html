@@ -1,0 +1,108 @@
+<div class="register-container">
+  <div class="register-card">
+    <h2>📝 Kreiraj Nalog</h2>
+    <p class="subtitle">Pridružite nam se i započnite kupovinu!</p>
+
+    <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">Ime</label>
+          <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            [(ngModel)]="registerData.firstName"
+            placeholder="Marko"
+            [disabled]="isLoading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Prezime</label>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            [(ngModel)]="registerData.lastName"
+            placeholder="Marković"
+            [disabled]="isLoading"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="username">Korisničko ime *</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          [(ngModel)]="registerData.username"
+          placeholder="Izaberite korisničko ime (min 3 karaktera)"
+          [disabled]="isLoading"
+          [class.input-error]="errorMessage && !registerData.username"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="registerData.email"
+          placeholder="vas@email.com"
+          [disabled]="isLoading"
+          [class.input-error]="errorMessage && !registerData.email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Lozinka *</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="registerData.password"
+          placeholder="Min 8 karaktera, veliko/malo slovo, broj, specijalni znak"
+          [disabled]="isLoading"
+          [class.input-error]="errorMessage && !registerData.password"
+        />
+        <small class="hint">Lozinka mora sadržati: veliko slovo, malo slovo, broj i specijalni karakter</small>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Potvrdi Lozinku *</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          placeholder="Ponovite lozinku"
+          [disabled]="isLoading"
+          [class.input-error]="errorMessage && registerData.password !== confirmPassword"
+        />
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        ❌ {{ errorMessage }}
+      </div>
+
+      <div *ngIf="successMessage" class="success-message">
+        ✅ {{ successMessage }}
+      </div>
+
+      <button type="submit" class="btn-register" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Kreiraj Nalog</span>
+        <span *ngIf="isLoading">Kreiranje naloga...</span>
+      </button>
+    </form>
+
+    <div class="login-link">
+      Već imate nalog? <a routerLink="/login">Prijavite se ovde</a>
+    </div>
+
+    <div class="back-link">
+      <a routerLink="/">← Nazad na početnu</a>
+    </div>
+  </div>
+</div>

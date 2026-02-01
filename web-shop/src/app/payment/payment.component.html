@@ -5,26 +5,39 @@
       Inicijalizacija plaćanja rezervacije
     </p>
 
+    <!-- Auth status banner -->
+    <div *ngIf="!authService.isAuthenticated()" class="auth-banner">
+      <span>🔐 Prijavite se za rezervaciju vozila</span>
+      <div class="auth-actions">
+        <a routerLink="/login" class="btn-login-small">Prijava</a>
+        <a routerLink="/register" class="btn-register-small">Registracija</a>
+      </div>
+    </div>
+
+    <div *ngIf="authService.isAuthenticated()" class="welcome-banner">
+      👋 Dobrodošli, {{ authService.getCurrentUser()?.firstName || authService.getCurrentUser()?.username }}!
+    </div>
+
     <form (ngSubmit)="initiatePayment()">
-      
+
       <div class="form-group">
         <label for="amount">Iznos za uplatu:</label>
-        <input 
-          type="number" 
-          id="amount" 
-          [(ngModel)]="transaction.amount" 
-          name="amount" 
-          class="form-control" 
+        <input
+          type="number"
+          id="amount"
+          [(ngModel)]="transaction.amount"
+          name="amount"
+          class="form-control"
           placeholder="Unesite iznos (npr. 5000)"
           required>
       </div>
 
       <div class="form-group">
         <label for="currency">Valuta:</label>
-        <select 
-          id="currency" 
-          [(ngModel)]="transaction.currency" 
-          name="currency" 
+        <select
+          id="currency"
+          [(ngModel)]="transaction.currency"
+          name="currency"
           class="form-control">
           <option value="RSD">RSD (Srpski Dinar)</option>
           <option value="EUR">EUR (Euro)</option>
