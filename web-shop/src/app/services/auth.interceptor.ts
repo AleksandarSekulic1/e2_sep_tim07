@@ -23,7 +23,13 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
+        // Don't try to refresh token for auth endpoints (login, register, refresh)
+        // These endpoints should handle 401 errors themselves
+        const isAuthEndpoint = request.url.includes('/auth/login') ||
+                               request.url.includes('/auth/register') ||
+                               request.url.includes('/auth/refresh');
+
+        if (error.status === 401 && !isAuthEndpoint) {
           return this.handle401Error(request, next);
         }
         return throwError(() => error);

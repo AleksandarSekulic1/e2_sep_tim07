@@ -6,9 +6,9 @@
     <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
       <div class="form-group">
         <label for="usernameOrEmail">Korisničko ime ili Email</label>
-        <input 
-          type="text" 
-          id="usernameOrEmail" 
+        <input
+          type="text"
+          id="usernameOrEmail"
           name="usernameOrEmail"
           [(ngModel)]="loginData.usernameOrEmail"
           placeholder="Unesite korisničko ime ili email"
@@ -19,9 +19,9 @@
 
       <div class="form-group">
         <label for="password">Lozinka</label>
-        <input 
-          type="password" 
-          id="password" 
+        <input
+          type="password"
+          id="password"
           name="password"
           [(ngModel)]="loginData.password"
           placeholder="Unesite lozinku"

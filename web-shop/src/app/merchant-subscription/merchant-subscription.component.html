@@ -1,51 +1,77 @@
 <div class="subscription-container">
-  <h2>Merchant Subscription (PSP)</h2>
+  <h2>Pretplata Web Shopa na PSP</h2>
+  <p class="subtitle">Registrujte vaš web shop i izaberite načine plaćanja koje želite da ponudite korisnicima.</p>
+  
   <div *ngIf="registeredMerchant" class="info-box">
     <p><strong>Merchant ID:</strong> {{ registeredMerchant.merchantId }}</p>
     <p><strong>API Key (Password):</strong> {{ registeredMerchant.merchantPassword }}</p>
-    <p>Use these credentials in your Web Shop configuration.</p>
+    <p>Koristite ove kredencijale u konfiguraciji vašeg Web Shop-a.</p>
   </div>
 
   <form (ngSubmit)="onSubmit()">
     <div class="form-group">
-      <label for="name">Web Shop Name:</label>
+      <label for="name">Naziv Web Shop-a:</label>
       <input type="text" id="name" [(ngModel)]="merchantName" name="merchantName" required [disabled]="!!registeredMerchant">
     </div>
 
-    <h3>Select Payment Services</h3>
+    <h3>Izaberite Načine Plaćanja</h3>
+    <p class="help-text">Označite servise na koje se pretplaćujete. Korisnici će moći da biraju samo među ovim opcijama.</p>
+    
     <div class="checkbox-group">
-      <label>
-        <input type="checkbox" [(ngModel)]="bankEnabled" name="bankEnabled">
-        Bank Payment (Cards, QR)
+      <label class="payment-option">
+        <input type="checkbox" [(ngModel)]="cardEnabled" name="cardEnabled">
+        <span class="option-icon">💳</span>
+        <span class="option-text">
+          <strong>Platna Kartica</strong>
+          <small>Visa, Mastercard, AmEx</small>
+        </span>
       </label>
-      <label>
+      <label class="payment-option">
+        <input type="checkbox" [(ngModel)]="qrEnabled" name="qrEnabled">
+        <span class="option-icon">📱</span>
+        <span class="option-text">
+          <strong>QR Kod</strong>
+          <small>Plaćanje skeniranjem QR koda</small>
+        </span>
+      </label>
+      <label class="payment-option">
         <input type="checkbox" [(ngModel)]="paypalEnabled" name="paypalEnabled">
-        PayPal
+        <span class="option-icon">🅿️</span>
+        <span class="option-text">
+          <strong>PayPal</strong>
+          <small>Plaćanje putem PayPal naloga</small>
+        </span>
       </label>
-      <label>
+      <label class="payment-option">
         <input type="checkbox" [(ngModel)]="cryptoEnabled" name="cryptoEnabled">
-        Cryptocurrency
+        <span class="option-icon">₿</span>
+        <span class="option-text">
+          <strong>Kriptovalute</strong>
+          <small>Bitcoin i druge kriptovalute</small>
+        </span>
       </label>
     </div>
 
-    <h3>Callback URLs</h3>
+    <h3>Callback URL-ovi</h3>
+    <p class="help-text">URL-ovi na koje PSP vraća korisnika nakon plaćanja.</p>
+    
     <div class="form-group">
-      <label for="successUrl">SUCCESS_URL</label>
+      <label for="successUrl">SUCCESS_URL (uspešno plaćanje)</label>
       <input id="successUrl" name="successUrl" [(ngModel)]="successUrl" type="url" required>
     </div>
     <div class="form-group">
-      <label for="failedUrl">FAILED_URL</label>
+      <label for="failedUrl">FAILED_URL (neuspešno plaćanje)</label>
       <input id="failedUrl" name="failedUrl" [(ngModel)]="failedUrl" type="url" required>
     </div>
     <div class="form-group">
-      <label for="errorUrl">ERROR_URL</label>
+      <label for="errorUrl">ERROR_URL (greška u sistemu)</label>
       <input id="errorUrl" name="errorUrl" [(ngModel)]="errorUrl" type="url" required>
     </div>
 
     <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
 
     <button type="submit" class="btn-primary">
-      {{ registeredMerchant ? 'Update Subscription' : 'Register Web Shop' }}
+      {{ registeredMerchant ? 'Ažuriraj Pretplatu' : 'Registruj Web Shop' }}
     </button>
   </form>
 </div>

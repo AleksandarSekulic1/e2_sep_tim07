@@ -19,25 +19,25 @@
     </div>
 
     <form (ngSubmit)="initiatePayment()">
-      
+
       <div class="form-group">
         <label for="amount">Iznos za uplatu:</label>
-        <input 
-          type="number" 
-          id="amount" 
-          [(ngModel)]="transaction.amount" 
-          name="amount" 
-          class="form-control" 
+        <input
+          type="number"
+          id="amount"
+          [(ngModel)]="transaction.amount"
+          name="amount"
+          class="form-control"
           placeholder="Unesite iznos (npr. 5000)"
           required>
       </div>
 
       <div class="form-group">
         <label for="currency">Valuta:</label>
-        <select 
-          id="currency" 
-          [(ngModel)]="transaction.currency" 
-          name="currency" 
+        <select
+          id="currency"
+          [(ngModel)]="transaction.currency"
+          name="currency"
           class="form-control">
           <option value="RSD">RSD (Srpski Dinar)</option>
           <option value="EUR">EUR (Euro)</option>

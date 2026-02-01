@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 import { AuthService, LoginRequest } from '../services/auth.service';
 
 @Component({
@@ -16,7 +17,7 @@ export class LoginComponent {
     usernameOrEmail: '',
     password: ''
   };
-  
+
   isLoading = false;
   errorMessage = '';
   successMessage = '';
@@ -31,7 +32,7 @@ export class LoginComponent {
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/']);
     }
-    
+
     // Get return URL from query params
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
@@ -53,19 +54,19 @@ export class LoginComponent {
 
     this.isLoading = true;
 
-    this.authService.login(this.loginData).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.successMessage = 'Prijava uspešna!';
-        setTimeout(() => {
-          this.router.navigate([this.returnUrl]);
-        }, 500);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = this.parseErrorMessage(error);
-      }
-    });
+    this.authService.login(this.loginData)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (response) => {
+          this.successMessage = 'Prijava uspešna!';
+          setTimeout(() => {
+            this.router.navigate([this.returnUrl]);
+          }, 500);
+        },
+        error: (error) => {
+          this.errorMessage = this.parseErrorMessage(error);
+        }
+      });
   }
 
   private parseErrorMessage(error: any): string {

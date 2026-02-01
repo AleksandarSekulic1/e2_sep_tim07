@@ -14,11 +14,15 @@ import { AuthService } from '../services/auth.service';
 })
 export class PaymentComponent {
 
+  // Default merchant credentials (Agencija za iznajmljivanje vozila)
+  private readonly DEFAULT_MERCHANT_ID = 'AGENCY_001';
+  private readonly DEFAULT_MERCHANT_PASSWORD = 'MerchantPass123!';
+
   // Podaci za inicijalizaciju (Tabela 1 iz specifikacije)
   transaction: any = {
     amount: 5000,            // Podrazumevana vrednost
     currency: 'RSD',
-    merchantId: '',          // Učitavamo iz LocalStorage
+    merchantId: '',          // Učitavamo iz LocalStorage ili koristimo default
     merchantPassword: '',
     merchantOrderId: '',
     merchantTimestamp: '',
@@ -35,16 +39,22 @@ export class PaymentComponent {
     public authService: AuthService,
     private router: Router
   ) {
-    // Učitavanje merchant kredencijala iz LocalStorage
+    // Učitavanje merchant kredencijala iz LocalStorage ili koristi default
     const storedId = localStorage.getItem('merchantId');
     const storedPass = localStorage.getItem('merchantPassword');
 
     if (!storedId || !storedPass) {
-      console.warn('⚠️ Merchant credentials not found! Please register at /merchant-subscription first.');
+      // Use default merchant (Agencija za iznajmljivanje vozila)
+      console.log('ℹ️ Using default merchant: ' + this.DEFAULT_MERCHANT_ID);
+      this.transaction.merchantId = this.DEFAULT_MERCHANT_ID;
+      this.transaction.merchantPassword = this.DEFAULT_MERCHANT_PASSWORD;
+      // Optionally save to localStorage
+      localStorage.setItem('merchantId', this.DEFAULT_MERCHANT_ID);
+      localStorage.setItem('merchantPassword', this.DEFAULT_MERCHANT_PASSWORD);
+    } else {
+      this.transaction.merchantId = storedId;
+      this.transaction.merchantPassword = storedPass;
     }
-
-    this.transaction.merchantId = storedId || '';
-    this.transaction.merchantPassword = storedPass || '';
   }
 
   initiatePayment() {

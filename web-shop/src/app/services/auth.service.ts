@@ -58,7 +58,7 @@ export class AuthService {
   private loadStoredUser(): void {
     const token = localStorage.getItem(this.TOKEN_KEY);
     const userJson = localStorage.getItem(this.USER_KEY);
-    
+
     if (token && userJson) {
       try {
         const user = JSON.parse(userJson);
@@ -105,7 +105,7 @@ export class AuthService {
     const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
     if (!refreshToken) {
       this.clearAuth();
-      return of() as Observable<AuthResponse>;
+      return throwError(() => new Error('No refresh token'));
     }
 
     return this.http.post<AuthResponse>(`${this.API_URL}/refresh`, { refreshToken })
@@ -173,7 +173,7 @@ export class AuthService {
   private handleAuthResponse(response: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, response.accessToken);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-    
+
     const user: User = {
       username: response.username,
       email: response.email,
@@ -181,7 +181,7 @@ export class AuthService {
       firstName: response.firstName,
       lastName: response.lastName
     };
-    
+
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
     this.currentUserSubject.next(user);
     this.isAuthenticatedSubject.next(true);

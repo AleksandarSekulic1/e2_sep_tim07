@@ -184,15 +184,45 @@ public class AdminController {
     // ==================== Audit Logs (PCI DSS 10) ====================
 
     /**
-     * Get paginated audit logs
+     * Get paginated audit logs with optional filtering
      * PCI DSS 10.2.3 - Access to all audit trails
      */
     @GetMapping("/audit-logs")
     public ResponseEntity<?> getAuditLogs(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "100") int size) {
+            @RequestParam(defaultValue = "100") int size,
+            @RequestParam(required = false) String actionType,
+            @RequestParam(required = false) String outcome) {
         
-        Page<AuditLog> logs = auditService.getAllLogs(page, size);
+        Page<AuditLog> logs;
+        
+        // Use filtered search if filters provided
+        if (actionType != null || outcome != null) {
+            AuditLog.AuditActionType actionTypeEnum = null;
+            AuditLog.AuditOutcome outcomeEnum = null;
+            
+            if (actionType != null && !actionType.isEmpty()) {
+                try {
+                    actionTypeEnum = AuditLog.AuditActionType.valueOf(actionType);
+                } catch (IllegalArgumentException e) {
+                    // Invalid action type, ignore filter
+                }
+            }
+            
+            if (outcome != null && !outcome.isEmpty()) {
+                try {
+                    outcomeEnum = AuditLog.AuditOutcome.valueOf(outcome);
+                } catch (IllegalArgumentException e) {
+                    // Invalid outcome, ignore filter
+                }
+            }
+            
+            logs = auditService.searchLogs(null, actionTypeEnum, outcomeEnum, null, null, null, 
+                    org.springframework.data.domain.PageRequest.of(page, size, 
+                            org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "timestamp")));
+        } else {
+            logs = auditService.getAllLogs(page, size);
+        }
         
         // Convert to safe response without sensitive data
         List<Map<String, Object>> logList = logs.getContent().stream()

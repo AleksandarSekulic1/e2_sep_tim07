@@ -2,20 +2,19 @@
   <div class="navbar-brand">
     🚗 Rent-A-Car Agency
   </div>
-  
+
   <div class="navbar-links">
     <!-- Public: Vehicle browsing -->
     <a routerLink="/payment" routerLinkActive="active-link">🚗 Vozila</a>
-    
+
     <!-- CUSTOMER only: Purchase history and rentals -->
     <ng-container *ngIf="isCustomer">
       <a routerLink="/transactions" routerLinkActive="active-link">📋 Moje Rezervacije</a>
     </ng-container>
-    
+
     <!-- SUPER_ADMIN only: Admin panel -->
     <ng-container *ngIf="isSuperAdmin">
-      <a routerLink="/admin/payment-methods" routerLinkActive="active-link" class="admin-link">💳 Načini Plaćanja</a>
-      <a routerLink="/admin/merchants" routerLinkActive="active-link" class="admin-link">🏪 Trgovci</a>
+      <a routerLink="/merchant-subscription" routerLinkActive="active-link" class="admin-link">📝 Pretplata Web Shopa</a>
       <a routerLink="/admin/audit-logs" routerLinkActive="active-link" class="admin-link">📊 Audit Logovi</a>
     </ng-container>
   </div>

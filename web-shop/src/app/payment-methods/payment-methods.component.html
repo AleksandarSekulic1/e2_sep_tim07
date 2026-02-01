@@ -9,14 +9,14 @@
         </div>
 
         <div class="methods-grid" *ngIf="!loading">
-            <div class="method-card active" *ngIf="bankAllowed" (click)="chooseCard()">
+            <div class="method-card active" *ngIf="cardAllowed" (click)="chooseCard()">
                 <div class="icon-wrapper">💳</div>
                 <h3>Platna Kartica</h3>
                 <p>Visa, MasterCard, DinaCard</p>
                 <span class="badge">Preporučeno</span>
             </div>
 
-            <div class="method-card active" *ngIf="bankAllowed" (click)="chooseQR()">
+            <div class="method-card active" *ngIf="qrAllowed" (click)="chooseQR()">
                 <div class="icon-wrapper">📱</div>
                 <h3>IPS QR Kod</h3>
                 <p>Skeniraj i plati (NBS IPS)</p>
@@ -32,13 +32,18 @@
             </div>
 
             <div class="method-card active" *ngIf="cryptoAllowed" (click)="chooseCrypto()">
-                <div class="icon-wrapper">E</div>
+                <div class="icon-wrapper">₿</div>
                 <h3>Kriptovaluta</h3>
                 <p>Ethereum (Sepolia)</p>
                 <span class="badge">ETH</span>
             </div>
+            
+            <!-- No methods available message -->
+            <div *ngIf="!cardAllowed && !qrAllowed && !paypalAllowed && !cryptoAllowed" class="no-methods">
+                <p>⚠️ Nema dostupnih načina plaćanja za ovog prodavca.</p>
+            </div>
         </div>
-        <div *ngIf="loading">Loading payment options...</div>
+        <div *ngIf="loading" class="loading-state">⏳ Učitavanje opcija plaćanja...</div>
 
         <div class="psp-footer">
             <p>🔒 Sigurna komunikacija sa bankom je aktivna</p>

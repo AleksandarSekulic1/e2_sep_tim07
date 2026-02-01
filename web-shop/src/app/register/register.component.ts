@@ -19,7 +19,7 @@ export class RegisterComponent {
     firstName: '',
     lastName: ''
   };
-  
+
   confirmPassword = '';
   isLoading = false;
   errorMessage = '';
