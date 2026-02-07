@@ -67,24 +67,24 @@ h2 {
 .crypto-badge { background-color: #f7931a; color: white; }
 
 /* Statusi */
-.success { 
-  color: #155724; 
-  background-color: #d4edda; 
-  padding: 5px 10px; 
-  border-radius: 4px; 
+.success {
+  color: #155724;
+  background-color: #d4edda;
+  padding: 5px 10px;
+  border-radius: 4px;
 }
 
-.failed { 
-  color: #721c24; 
-  background-color: #f8d7da; 
-  padding: 5px 10px; 
-  border-radius: 4px; 
+.failed {
+  color: #721c24;
+  background-color: #f8d7da;
+  padding: 5px 10px;
+  border-radius: 4px;
 }
 
 .initiated {
   color: #004085;
   background-color: #cce5ff;
-  padding: 5px 10px; 
+  padding: 5px 10px;
   border-radius: 4px;
 }
 
