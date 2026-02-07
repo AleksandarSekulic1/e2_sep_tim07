@@ -22,7 +22,8 @@ Fajlovi:
 - docker/nginx-ha.conf                (Nginx za lokalni HA)
 - docker/nginx-swarm.conf             (Nginx za Swarm multi-host)
 - docker/deploy-ha.sh                 (skripta za lokalni HA)
-- docker/deploy-swarm.sh              (skripta za multi-host deploy)
+- docker/deploy-swarm.sh              (skripta za multi-host deploy - Linux/Mac)
+- docker/deploy-swarm.ps1             (skripta za multi-host deploy - Windows)
 
 ================================================================
 DEO A: LOKALNI HA TEST (1 računar, docker-compose)
@@ -75,14 +76,14 @@ docker stack rm psp
 
 Manager (Računar 1):
 cd docker/
-bash deploy-swarm.sh init
+.\deploy-swarm.ps1 init
 (Skripta će ispisati TOKEN i komandu za Worker.)
 
 Worker (Računar 2):
 docker swarm join --token <TOKEN> <MANAGER_IP>:2377
 
 Manager (Računar 1):
-bash deploy-swarm.sh deploy
+.\deploy-swarm.ps1 deploy
 (Sačekaj oko 60 sekundi da se svi Java servisi i baze podignu pre testiranja.)
 
 3. KOMANDE ZA TESTIRANJE
@@ -120,13 +121,3 @@ Terminal 2 (Worker) – čitanje iz Replike:
 docker exec $(docker ps -q -f name=psp_psp-core-db-replica) psql -U postgres -d psp_core_db -c "SELECT * FROM test_ha;"
 Potvrda: Moraš videti ispis: REPLIKACIJA RADI.
 
-================================================================
-BEZBEDNOST KOMUNIKACIJE - Šta pokriva svaki sloj
-================================================================
-
-Korisnik -> Nginx                    = HTTPS (TLS 1.2/1.3)
-Nginx -> Microservices (inter-node)  = IPsec encrypted overlay
-Microservice -> Database             = IPsec encrypted overlay
-Microservice -> RabbitMQ             = IPsec encrypted overlay
-Swarm management traffic             = Mutual TLS (built-in)
-DB Primary -> Replica                = IPsec encrypted overlay
