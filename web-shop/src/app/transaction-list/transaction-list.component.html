@@ -2,20 +2,20 @@
   <h2>📋 Istorija Transakcija</h2>
 
   <div class="search-box">
-    <input 
-      type="text" 
-      placeholder="🔍 Pretraži po ID-u, Iznosu ili Statusu..." 
-      [(ngModel)]="searchText" 
+    <input
+      type="text"
+      placeholder="🔍 Pretraži po ID-u, Iznosu ili Statusu..."
+      [(ngModel)]="searchText"
       (input)="filterData()"
       class="search-input"
     >
   </div>
-  
+
   <table class="styled-table">
     <thead>
       <tr>
         <th>ID</th>
-        <th>Vreme</th> 
+        <th>Vreme</th>
         <th>Prodavnica ID</th>
         <th>Iznos</th>
         <th>Valuta</th>
@@ -37,7 +37,7 @@
         <td>
           <ng-container *ngIf="t.paymentMethod; else noMethod">
             <span class="badge" [ngClass]="{
-              'card-badge': t.paymentMethod === 'CARD', 
+              'card-badge': t.paymentMethod === 'CARD',
               'paypal-badge': t.paymentMethod === 'PAYPAL',
               'qr-badge': t.paymentMethod === 'QR'
             }">
@@ -63,11 +63,11 @@
 <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <span class="close-btn" (click)="closeModal()">&times;</span>
-    
+
     <h2>🔍 Detalji Transakcije #{{ selectedTransaction?.id }}</h2>
-    
+
     <div class="modal-grid" *ngIf="selectedTransaction">
-      
+
       <div class="detail-item">
         <label>Trenutni Status:</label>
         <span class="status-text" [ngClass]="selectedTransaction.status.toLowerCase()">
@@ -95,7 +95,7 @@
                     <small>STAN (PSP AUDIT ID):</small>
                     <p>{{ selectedTransaction.stan || 'N/A' }}</p>
                 </div>
-                
+
                 <div class="info-group">
                     <small>WEBSHOP ORDER ID:</small>
                     <p>{{ selectedTransaction.merchantOrderId }}</p>
@@ -123,7 +123,7 @@
       </div>
 
     </div>
-    
+
     <div class="modal-actions">
       <button class="btn-close" (click)="closeModal()">Zatvori detalje</button>
     </div>
