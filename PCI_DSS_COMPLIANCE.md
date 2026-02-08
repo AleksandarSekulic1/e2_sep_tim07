@@ -16,9 +16,5 @@ curl.exe -vk https://localhost/health
 curl.exe -vk --tlsv1.2 https://localhost/health
 Potvrda: TLS 1.2 poziv prolazi (minimum). U -v ispisu vidi se subject sertifikata.
 
-Test provere HTTP->HTTPS redirecta:
-curl.exe -v http://localhost/api/core/test 2>&1 | Select-String -Pattern "301|Location|https"
-Potvrda: HTTP zahtev vraca 301 redirect na HTTPS.
-
 
 
