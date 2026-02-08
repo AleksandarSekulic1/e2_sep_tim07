@@ -434,11 +434,11 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: user
       RABBITMQ_PASSWORD: password
-      CORE_SERVICE_URL: http://nginx-lb/api/core
-      BANK_SERVICE_URL: http://nginx-lb/api/bank
-      CARD_SERVICE_URL: http://nginx-lb/api/card
-      PAYPAL_SERVICE_URL: http://nginx-lb/api/paypal
-      CRYPTO_SERVICE_URL: http://nginx-lb/api/crypto
+      CORE_SERVICE_URL: http://core-service:8080
+      BANK_SERVICE_URL: http://bank-service:8080
+      CARD_SERVICE_URL: http://card-service:8080
+      PAYPAL_SERVICE_URL: http://paypal-service:8080
+      CRYPTO_SERVICE_URL: http://crypto-service:8080
       RESILIENCE4J_CIRCUITBREAKER_ENABLED: "true"
       RESILIENCE4J_RETRY_ENABLED: "true"
     networks:
