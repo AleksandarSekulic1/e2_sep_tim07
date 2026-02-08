@@ -8,7 +8,8 @@ DEO A: LOKALNI HA TEST (1 računar, docker-compose)
 docker-compose -f docker-compose-ha.yml down -v
 
 2. Pokreni skalirani sistem (3 instance Core servisa):
-docker-compose -f docker-compose-ha.yml up -d --scale core-service=3
+a)docker compose -f docker-compose-ha.yml up -d 
+b)docker-compose -f docker-compose-ha.yml up -d --scale core-service=3
 (Sačekaj oko 60 sekundi da se svi Java servisi i baze podignu pre testiranja).
 
 3. KOMANDE ZA TESTIRANJE
@@ -18,7 +19,7 @@ TEST 1: Skaliranje (Load Balancing)
 Cilj: Da vidiš da se IP adrese (Upstream) menjaju (12, 17, 18...).
 Terminal 1 (pokreni ovo i gledaj):
 docker logs -f nginx-lb
-Browser: Otvori https://localhost/api/core/actuator/health i uradi Hard Refresh (CTRL + F5) 10 puta brzo.
+Browser: Otvori https://localhost/api/core/test i uradi Hard Refresh (CTRL + F5) 10 puta brzo.
 
 Potvrda: U terminalu 1 gledaj kraj redova. Moraš videti različite IP adrese (npr. Upstream: 172.18.0.12, pa 172.18.0.15).
 
