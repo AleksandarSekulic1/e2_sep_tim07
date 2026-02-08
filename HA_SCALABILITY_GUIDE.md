@@ -76,7 +76,7 @@ KORAK 2: Inicijalizacija Swarm-a (na node1 – Manager)
 --------------------------------------------------------
 3. Na node1 (Manager) – inicijalizuj Swarm:
 
-   docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
+   $ docker swarm init --advertise-addr 192.168.0.29
 
    Potvrda: Ispisaće komandu za join sa tokenom. Kopiraj celu liniju:
    "docker swarm join --token SWMTKN-xxxxx... <IP>:2377"
@@ -121,6 +121,10 @@ KORAK 3: Kloniranje Projekta i Build (na node1 – Manager)
 KORAK 4: Build i Push Docker Images (na node1 – Manager)
 -----------------------------------------------------------
 9. Na node1 (Manager) – builduj sve mikroservise:
+
+   VAZNO: Ove komande moras pokrenuti iz foldera projekta /docker.
+   Primer:
+   cd e2_sep_tim07/docker
 
    docker build -t localhost:5000/psp-core-service:latest ../psp-services/core-service/
    docker build -t localhost:5000/psp-bank-service:latest ../psp-services/bank-service/
