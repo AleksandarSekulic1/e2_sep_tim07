@@ -54,7 +54,7 @@ Najlakši način za demo. Sajt daje besplatne Linux Docker nodove.
 2. Klikni "Add New Instance" DVA PUTA (dobiješ 2 nodea: node1 = Manager, node2 = Worker).
 
 3. Na node1 (Manager) – inicijalizuj Swarm:
-docker swarm init
+$ docker swarm init --advertise-addr 192.168.0.29(ip adresa)
    (Ispisaće komandu za join sa tokenom. Kopiraj celu "docker swarm join --token ..." liniju.)
 
 4. Na node2 (Worker) – zalepi kopiranu komandu:
