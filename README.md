@@ -1,70 +1,77 @@
-# 💳 PSP - Payment Service Provider 
+# 💳 PSP - Payment Service Provider
 
-Ovaj projekat predstavlja implementaciju sistema pružaoca usluga plaćanja (PSP) koji omogućava sigurnu transakciju između WebShop-a (Rent-A-Car agencije) i bankarskog servisa.
+This project implements a Payment Service Provider (PSP) system that enables secure transactions between a WebShop (Rent-A-Car agency) and a banking service.
 
-### 👥 Članovi tima:
+### 👥 Team Members
+
 * **Aleksandar Sekulić**
 * **Mihajlo Bogdanović**
 
 ---
 
-## 🚀 Pregled Sistema
-Sistem je zasnovan na **mikroservisnoj arhitekturi** i podržava dva asinhrona toka plaćanja: platnim karticama i NBS IPS QR kodom.
+## 🚀 System Overview
 
-### Ključne komponente:
-* **API Gateway (Port 8080):** Centralna tačka ulaza koja upravlja rutiranjem i CORS polisama.
-* **Core Service (Port 8081):** Upravlja transakcijama, generiše **STAN** i čuva audit trail u bazi.
-* **Bank Service (Port 8082):** Simulacija bankarskog sistema za validaciju kartica.
-* **Mobile mBanking App (Android):** Izvorni simulator mobilnog bankarstva za skeniranje QR kodova.
-* **Angular Frontend (Port 4200):** Korisnički interfejs sa polling mehanizmom za praćenje statusa transakcija.
+The system is based on a **microservices architecture** and supports two asynchronous payment flows: card payments and NBS IPS QR code payments.
 
----
+### Key Components
 
-## 🛠️ Implementirane Metode Plaćanja (KT 1)
-
-### 1. Plaćanje Platnim Karticama (Card Plug-in)
-* **Validacija:** Luhn check, provera datuma isteka i CVV koda.
-* **Bezbednost:** Anti-fraud mehanizam (jedan pokušaj po formi).
-* **Webhook:** Asinhrono ažuriranje statusa (`PAID`/`FAILED`) nakon potvrde iz banke.
-
-### 2. Plaćanje QR Kodom (NBS IPS Standard)
-* **IPS Generator:** Kreiranje validnog NBS stringa (`K:PR|V:01...`) sa podacima prodavca i iznosom.
-* **Polling Mehanizam:** Frontend automatski proverava status transakcije svake 3 sekunde dok ne dobije potvrdu.
-* **Mobile Simulator:** Android aplikacija koja skenira kod, dekodira podatke i autorizuje uplatu direktno na backendu.
+* **API Gateway (Port 8080):** Central entry point responsible for request routing and CORS policy management.
+* **Core Service (Port 8081):** Handles transaction processing, generates **STAN** values, and maintains an audit trail in the database.
+* **Bank Service (Port 8082):** Simulated banking system used for card validation and payment authorization.
+* **Mobile mBanking App (Android):** Native mobile banking simulator used for QR code scanning and payment authorization.
+* **Angular Frontend (Port 4200):** User interface featuring a polling mechanism for real-time transaction status tracking.
 
 ---
 
-## 📊 Dijagram Toka (QR Plaćanje)
+## 🛠️ Implemented Payment Methods (KT 1)
 
+### 1. Card Payment (Card Plug-in)
 
+* **Validation:** Luhn algorithm validation, card expiration date verification, and CVV validation.
+* **Security:** Anti-fraud protection mechanism (single payment attempt per form submission).
+* **Webhook Integration:** Asynchronous status updates (`PAID` / `FAILED`) after bank confirmation.
 
----
+### 2. QR Code Payment (NBS IPS Standard)
 
-## 🖥️ Pregled Interfejsa i Audit Trail
-* **Real-time Monitoring:** Svaka transakcija (Card ili QR) dobija `GLOBAL_TRANSACTION_ID` i `ACQUIRER_TIMESTAMP` kao dokaz o naplati.
-* **Validacija Standarda:** Prikaz sirovog IPS stringa ispod QR koda kao dokaz usklađenosti sa NBS standardima.
-
----
-
-## ⚙️ Tehnologije
-* **Backend:** Java 21, Spring Boot 3.4.1.
-* **Frontend:** Angular 18+, TypeScript.
-* **Mobile:** Kotlin, Android SDK (API 30+), ZXing skener.
-* **Baza podataka:** PostgreSQL.
+* **IPS Generator:** Creates a valid NBS IPS payment string (`K:PR|V:01...`) containing merchant and payment details.
+* **Polling Mechanism:** The frontend automatically checks the transaction status every 3 seconds until a final response is received.
+* **Mobile Simulator:** Android application that scans the QR code, decodes the payment data, and authorizes the transaction directly through the backend.
 
 ---
 
-## 🚀 Pokretanje Projekta
+## 📊 Payment Flow Diagram (QR Payment)
 
-1. **Backend:** Pokrenuti servise u `psp-services` folderu.
-2. **Frontend:** Pokrenuti Angular iz `web-shop` foldera (`npm start`).
-3. **Mobile:** Otvoriti `mobile-bank-app` u Android Studiju, podesiti lokalnu IP adresu u `MainActivity.kt` i pokrenuti na fizičkom uređaju.
+*Diagram to be inserted here.*
 
 ---
 
-## 🧪 Scenario za Testiranje (QR Demo)
+## 🖥️ User Interface & Audit Trail
 
-1. Inicijalizovati QR plaćanje na WebShop-u.
-2. Pokrenuti **MobileBankSim** na telefonu.
-3. Skenirati kod sa ekrana računara.
-4. **Očekivani ishod:** Mobilna aplikacija ispisuje "Plaćeno!", a WebShop se automatski osvežava i prikazuje uspeh transakcije.
+* **Real-Time Monitoring:** Every transaction (Card or QR) is assigned a `GLOBAL_TRANSACTION_ID` and an `ACQUIRER_TIMESTAMP` as proof of payment processing.
+* **Standards Compliance Validation:** The raw IPS payment string is displayed below the QR code as evidence of compliance with NBS IPS standards.
+
+---
+
+## ⚙️ Technologies
+
+* **Backend:** Java 21, Spring Boot 3.4.1
+* **Frontend:** Angular 18+, TypeScript
+* **Mobile:** Kotlin, Android SDK (API 30+), ZXing Scanner
+* **Database:** PostgreSQL
+
+---
+
+## 🚀 Running the Project
+
+1. **Backend:** Start all services located in the `psp-services` directory.
+2. **Frontend:** Run the Angular application from the `web-shop` directory using `npm start`.
+3. **Mobile:** Open `mobile-bank-app` in Android Studio, configure the local IP address in `MainActivity.kt`, and deploy the application to a physical Android device.
+
+---
+
+## 🧪 Test Scenario (QR Payment Demo)
+
+1. Initiate a QR payment from the WebShop.
+2. Launch **MobileBankSim** on a mobile device.
+3. Scan the QR code displayed on the computer screen.
+4. **Expected Result:** The mobile application displays **"Payment Successful!"**, and the WebShop automatically refreshes to show a successful transaction status.
